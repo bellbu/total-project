@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    default: local
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb  #mydb 데이터 베이스 사용
+    username: root
+    password: "0000"
+    driver-class-name: com.mysql.cj.jdbc.Driver #DB 접속을 위한 Driver
+  jpa:
+    hibernate:
+      ddl-auto: update #스키마 자동 업데이트
+    show-sql: true
+
+logging:
+  lever:
+    org.springframework.cache: trace #Redis 사용에 대한 로그가 조회되도록 설정

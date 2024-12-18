@@ -1,0 +1,3 @@
+[submodule "submodule-data"]
+	path = submodule-data
+	url = https://github.com/bellbu/submodule-data.git

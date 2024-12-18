@@ -1,0 +1,44 @@
+plugins { // 플러그인 섹션
+	id 'org.springframework.boot' version '3.0.1' // Spring Boot 플러그인을 적용: 스프링 애플리케이션을 빌드하고 실행하는 데 필요한 작업을 자동으로 설정
+	id 'io.spring.dependency-management' version '1.0.12.RELEASE' // 외부 라이브러리, 프레임워크의 버전관리, 의존성 관리하는데 도와줌
+	id 'java' // Java 프로젝트로 인식되도록 해주는 기본 Java 플러그인
+}
+
+// 프로젝트 속성 섹션
+group = 'com.example' // 프로젝트 그룹 ID를 설정, 조직명이나 도메인 이름과 유사
+version = '0.0.1-SNAPSHOT' // 프로젝트의 버전을 설정, SNAPSHOT은 아직 완성되지 않은 개발 중인 버전을 의미
+sourceCompatibility = '17' // 프로젝트가 사용하고 있는 JDK 버전
+
+// 리포지토리 섹션
+repositories {
+	mavenCentral() // 외부 라이브러리/프레임워크를 가져오는 장소 설정, 대부분의 라이브러리들이 여기에서 다운로드 됨
+}
+
+// 의존성 섹션: 사용하는 라이브러리/프레임워크를 표시하는 곳
+dependencies { // implementation: 해당 의존성을 항시 사용, runtimeOnly: 코드를 실행할 때에만 의존성을 사용, testImplementation: 테스트 코드를 컴파일 하거나 실행시킬 때 항시 사용
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1' // MyBatis 추가
+
+	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'org.projectlombok:lombok' // lombok 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // redis 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA를 사용하여 데이터베이스와 상호작용할 수 있게 해주는 스프링 부트 스타터 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-web' // 웹 애플리케이션을 개발할 수 있게 해주는 스프링 부트 스타터 의존성(기본적으로 내장형 톰캣 서버를 포함)
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test' // 스프링 부트 애플리케이션을 테스트할 때 필요한 라이브러리들을 포함하는 스타터 의존성(JUnit, Mockito 등을 포함)
+	// runtimeOnly "org.springframework.boot:spring-boot-properties-migrator" // 마이그레이션 툴
+}
+
+// 테스트 태스크 설정
+tasks.named('test') {
+	useJUnitPlatform() // 테스트를 실행할 때 JUnit Platform을 사용(JUnit 5 기반의 테스트 환경을 사용)
+}
+
+task copyPrivate(type: Copy) {
+	copy {
+		from './submodule-data/library-app'
+		include "*.yml"
+		into 'src/main/resources'
+	}
+}

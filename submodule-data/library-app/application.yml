@@ -1,0 +1,41 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: "jdbc:h2:mem:library;MODE=MYSQL;NON_KEYWORDS=USER" #H2 사용하기 위한 url 설정 / NON_KEYWORDS=USER: USER 예약어 해제
+    username: "sa"
+    password: ""
+    driver-class-name: org.h2.Driver #DB 접속을 위한 Driver
+  jpa:
+    hibernate:
+      ddl-auto: create #서버 시작될 때 마다 테이블 제거하고 자동으로 생성해 줌
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect #JPA 방언 H2Dialect로 변경
+  h2:
+    console:
+      enabled: true #web console 활성화
+      path: /h2-console #활성화된 H2 web console의 주소
+
+--- #구분선
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: "jdbc:mysql://localhost/library"  #스프링이 데이터를 연결할 주소: mysql(데이터베이스 종류)/localhost(mysql 서버 주소)/library(사용할 데이터베이스)
+    username: "root"  #계정 아이디
+    password: "0000"  #계정 비번
+    driver-class-name: com.mysql.cj.jdbc.Driver  #데이터베이스에 접근할 때 사용할 프로그램
+  jpa:
+    hibernate:
+      ddl-auto: none #스프링이 시작할 때 DB에 있는 테이블과 매핑되지 않을 때 어떻게 처리할 지 설정
+    properties:
+      hibernate:
+        show_sql: true  #JPA 사용해 DB에 SQL을 날릴 때 SQL을 보여줄 지 설정
+        format_sql: true #SQL을 보여줄 때 서식에 맞춰서 보여줄 지 설정
+        dialect: org.hibernate.dialect.MySQL8Dialect #DB를 특정하면 해당 문법에 맞춰서 SQL을 수정
