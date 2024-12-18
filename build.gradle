@@ -1,7 +1,7 @@
 plugins { // 플러그인 섹션
+	id 'java' // Java 프로젝트로 인식되도록 해주는 기본 Java 플러그인
 	id 'org.springframework.boot' version '3.0.1' // Spring Boot 플러그인을 적용: 스프링 애플리케이션을 빌드하고 실행하는 데 필요한 작업을 자동으로 설정
 	id 'io.spring.dependency-management' version '1.0.12.RELEASE' // 외부 라이브러리, 프레임워크의 버전관리, 의존성 관리하는데 도와줌
-	id 'java' // Java 프로젝트로 인식되도록 해주는 기본 Java 플러그인
 }
 
 // 프로젝트 속성 섹션
@@ -16,18 +16,28 @@ repositories {
 
 // 의존성 섹션: 사용하는 라이브러리/프레임워크를 표시하는 곳
 dependencies { // implementation: 해당 의존성을 항시 사용, runtimeOnly: 코드를 실행할 때에만 의존성을 사용, testImplementation: 테스트 코드를 컴파일 하거나 실행시킬 때 항시 사용
-	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1' // MyBatis 추가
-
-	annotationProcessor 'org.projectlombok:lombok'
-	implementation 'org.projectlombok:lombok' // lombok 의존성 추가
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // redis 의존성 추가
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA를 사용하여 데이터베이스와 상호작용할 수 있게 해주는 스프링 부트 스타터 의존성
 	implementation 'org.springframework.boot:spring-boot-starter-web' // 웹 애플리케이션을 개발할 수 있게 해주는 스프링 부트 스타터 의존성(기본적으로 내장형 톰캣 서버를 포함)
-	runtimeOnly 'com.h2database:h2'
+	//implementation 'org.springframework.boot:spring-boot-starter-security' // 스프링 시큐리티
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA를 사용하여 데이터베이스와 상호작용할 수 있게 해주는 스프링 부트 스타터 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // redis 의존성 추가
+	implementation 'org.projectlombok:lombok' // lombok 추가
+	annotationProcessor 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools' // 기능: 자동 재시작, LiveReload 지원
 	runtimeOnly 'com.mysql:mysql-connector-j'
-
+	runtimeOnly 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test' // 스프링 부트 애플리케이션을 테스트할 때 필요한 라이브러리들을 포함하는 스타터 의존성(JUnit, Mockito 등을 포함)
-	// runtimeOnly "org.springframework.boot:spring-boot-properties-migrator" // 마이그레이션 툴
+	//testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// spring-boot-configuration-processor
+	implementation 'org.springframework.boot:spring-boot-configuration-processor' // application.yml에 정의된 설정을 코드에서 처리할 수 있도록 지원
+	implementation 'org.springframework.boot:spring-boot-starter-validation' // 유효성 검사 어노테이션 제공
+
+	// jwt
+	//implementation 'io.jsonwebtoken:jjwt-api:0.12.3' // jwt 생성, 서명, 파싱 등을 위한 API
+	//runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3' // jwt api 구현체.
+	//runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3' // jwt를 json으로 직렬화/역직렬화
+
 }
 
 // 테스트 태스크 설정
@@ -37,8 +47,52 @@ tasks.named('test') {
 
 task copyPrivate(type: Copy) {
 	copy {
-		from './submodule-data/library-app'
+		from './submodule-data/total-project'
 		include "*.yml"
 		into 'src/main/resources'
 	}
+}
+
+// React 빌드 설정
+def frontendDir = "$projectDir/src/main/frontend"  // React 프로젝트의 경로 설정
+
+sourceSets { // Spring Boot 리소스 설정
+	main {
+		resources { srcDirs = ["$projectDir/src/main/resources"] // 리소스 경로를 설정
+		}
+	}
+}
+
+processResources { // Spring Boot 리소스 처리 작업 실행
+	dependsOn "copyReactBuildFiles" // copyReactBuildFiles 작업이 성공적으로 완료된 후에만 processResources 실행
+}
+
+task installReact(type: Exec) { // React 의존성 설치 및 취약점 수정
+	workingDir "$frontendDir" // 작업 디렉토리 설정
+	inputs.dir "$frontendDir" // 입력 디렉토리 설정 (React 디렉토리에 변경이 없으면 작업 생략)
+	group = BasePlugin.BUILD_GROUP // Gradle 빌드 작업 그룹에 해당 작업을 포함시킴
+	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+		commandLine "npm.cmd", "audit", "fix" // npm audit fix: 취약점 수정
+		commandLine 'npm.cmd', 'install' }  // npm install: package.json 파일에 정의된 의존성 설치
+	else {
+		commandLine "npm", "audit", "fix" commandLine 'npm', 'install'
+	}
+}
+
+task buildReact(type: Exec) { // buildReact(type: Exec): 빌드 실행
+	dependsOn "installReact" // installReact 작업이 성공적으로 완료된 후에만 buildReact 실행
+	workingDir "$frontendDir"  // 작업 디렉토리 설정
+	inputs.dir "$frontendDir"  // 입력 디렉토리 설정 (React 디렉토리에 변경이 없으면 작업 생략)
+	group = BasePlugin.BUILD_GROUP  // Gradle 빌드 작업 그룹에 해당 작업을 포함시킴
+	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+		commandLine "npm.cmd", "run-script", "build" // npm run build: React 프로젝트 빌드 실행
+	} else {
+		commandLine "npm", "run-script", "build"
+	}
+}
+
+task copyReactBuildFiles(type: Copy) { // copyReactBuildFiles(type: Copy): React 발드 결과물을 Spring Boot로 복사
+	dependsOn "buildReact" // buildReact 작업이 성공적으로 완료된 후에만 copyReactBuildFiles 실행
+	from "$frontendDir/build"  // 복사할 파일의 원본 디렉토리 지정
+	into "$projectDir/src/main/resources/static" // 복사된 파일의 대상 디렉토리를 지정
 }

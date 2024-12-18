@@ -21,7 +21,7 @@ const TextButton = styled.button`
   cursor: pointer;
   font-size: 18px;
   font-weight: 700;
-  
+
   &:hover {
     color: whitesmoke;
   }

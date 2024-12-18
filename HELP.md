@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'com.group.library-app' is invalid and this project uses 'com.group.libraryapp' instead.
+* The original package name 'com.group.library-app' is invalid and this project uses 'com.group.totalproject' instead.
 
 # Getting Started
 
