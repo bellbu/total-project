@@ -3,6 +3,7 @@ body {
   font-family: 'NanumSquare';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
 }
 
 code {
@@ -17,4 +18,38 @@ code {
 
 html, body, #root, #root>div {
   height: 100%
+}
+
+
+.container {
+  width: 960px;
+  margin: 50px auto;
+  font-size: var(--font-size-main);
+}
+
+.container hr { margin-bottom: 50px; }
+
+.container * {
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  font-family: 'Noto Sans', 'Noto Sans KR', sans-serif;
+}
+
+.container ul { list-style-type: none; }
+
+.container a { text-decoration: none; color: black; }
+
+.container button { cursor: pointer; }
+
+.container .link { 
+  background-color: transparent; 
+  color: black; 
+  border: none; 
+  font-size: var(--font-size-main); 
+}
+
+:root {
+  --font-size-main : 20px;
+ 
 }
