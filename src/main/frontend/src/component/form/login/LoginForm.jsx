@@ -1,7 +1,9 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'; // 추가
 import styles from './LoginForm.css';
 
 const LoginForm = () => {
+    const navigate = useNavigate();
 
     const onLogin = () => {
 
@@ -36,6 +38,8 @@ const LoginForm = () => {
                     />
                 </div>
                 <button type='submit' className='btn btn--form btn-login'>로그인</button>
+                <hr className='login-hr'/>
+                <button className="btn btn--form btn-join" onClick={() => navigate('/join')}>가입</button>
             </form>
             
         </div>

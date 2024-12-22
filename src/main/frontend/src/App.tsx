@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import LoginContextProvider from './context/LoginContextProvider';
 import { LoginContext } from './context/LoginContextProvider'
 import Login from './page/login/Login';
+import Join from './page/join/Join';
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isLogin } = useContext(LoginContext);
@@ -21,6 +22,7 @@ function App() {
     <LoginContextProvider>
         <Routes>
           <Route path="/" element={ <Login />}></Route>
+          <Route path="/join" element={ <Join />}></Route>
           <Route path="/main"
                   element={
                           //<ProtectedRoute>
