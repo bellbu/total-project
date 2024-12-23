@@ -1,6 +1,9 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const JoinForm = () => {
+  const navigate = useNavigate();
+
   const onJoin = () => {
 
   }
@@ -41,7 +44,10 @@ const JoinForm = () => {
                     required       
               />
             </div>
-          <button type='submit' className='btn btn--form btn-join'>가입</button>
+          <div className="button-group">
+            <button type='submit' className='btn btn--form btn-join'>가입</button>
+            <button type='button' className='btn btn--form btn-cancel' onClick={() => navigate("/")}>취소</button>
+          </div>
       </form>
 
     </div>

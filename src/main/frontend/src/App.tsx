@@ -21,7 +21,10 @@ function App() {
     <BrowserRouter> 
     <LoginContextProvider>
         <Routes>
-          <Route path="/" element={ <Login />}></Route>
+          {/* 기본 URL에 접속 시 "/login"으로 리다이렉트 */}
+          <Route path="/" element={<Navigate to="/login" />} />
+
+          <Route path="/login" element={ <Login />}></Route>
           <Route path="/join" element={ <Join />}></Route>
           <Route path="/main"
                   element={

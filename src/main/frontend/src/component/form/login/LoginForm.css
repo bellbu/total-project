@@ -42,8 +42,6 @@
 
 
 .btn--form {
-    background-color: #f48982;
-    color: #fdf2e9;
     align-self: end;
     padding: 8px;
 }
@@ -64,28 +62,53 @@
     transition: all 0.3s;
 }
 
-.btn-login:hover {
-    outline: 1px solid #f48982;
+.btn-login {
+    background-color: #ff8787;
+    color: white;
 }
 
-.btn--form:hover {
-    background-color: #fdf2e9;
-    color: #f48982;
+.btn-login:hover {
+    background-color: #ff7777;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.35);
 }
 
 /* 가입 버튼 */
 .btn-join {
-    background-color: #6c63ff;
+    background-color: #748ffc;
     color: white;
-    font-size: 18px;
 }
 
 .btn-join:hover {
-    background-color: #fdf2e9;
-    color: #6c63ff;
-    outline: 1px solid #6c63ff;
+    background-color: #6c85f4;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(116, 143, 252, 0.35);
 }
 
 .login-hr{
     margin: 16px 0px !important;
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.button-group .btn {
+    width: 100%;
+}
+
+.btn-cancel {
+    background-color: #868e96;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #808790;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(134, 142, 150, 0.35);
 }
