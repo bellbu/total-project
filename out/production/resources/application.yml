@@ -33,9 +33,19 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver  #데이터베이스에 접근할 때 사용할 프로그램
   jpa:
     hibernate:
-      ddl-auto: none #스프링이 시작할 때 DB에 있는 테이블과 매핑되지 않을 때 어떻게 처리할 지 설정
+      ddl-auto: update #스프링이 시작할 때 DB에 있는 테이블과 매핑되지 않을 때 어떻게 처리할 지 설정
     properties:
       hibernate:
         show_sql: true  #JPA 사용해 DB에 SQL을 날릴 때 SQL을 보여줄 지 설정
         format_sql: true #SQL을 보여줄 때 서식에 맞춰서 보여줄 지 설정
         dialect: org.hibernate.dialect.MySQL8Dialect #DB를 특정하면 해당 문법에 맞춰서 SQL을 수정
+
+logging:
+  lever:
+    org.springframework.cache: trace # Redis 사용에 대한 로그가 조회되도록 설정
+
+jwt:
+  header: Authorization
+  # HS512 알고리즘의 시크릿키 : 512비트 (64바이트) 이상('silvernine-tech-spring-boot-jwt-tutorial-secret-silvernine-tech-spring-boot-jwt-tutorial-secret' 문자열을 base64로 인코딩)
+  secret-key: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
+  token-validity-in-seconds: 86400 # JWT 토큰의 유효 기간(초 단위)
