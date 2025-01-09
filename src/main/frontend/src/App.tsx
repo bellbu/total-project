@@ -18,24 +18,24 @@ function App() {
       <MainPage/>
     </React.StrictMode>
     */
-    <BrowserRouter> 
-    <LoginContextProvider>
-        <Routes>
-          {/* 기본 URL에 접속 시 "/login"으로 리다이렉트 */}
-          <Route path="/" element={<Navigate to="/login" />} />
+    <BrowserRouter>
+        <LoginContextProvider>
+            <Routes>
+              {/* 기본 URL에 접속 시 "/login"으로 리다이렉트 */}
+              <Route path="/" element={<Navigate to="/login" />} />
 
-          <Route path="/login" element={ <Login />}></Route>
-          <Route path="/join" element={ <Join />}></Route>
-          <Route path="/main"
-                  element={
-                          //<ProtectedRoute>
-                            <MainPage />
-                          //</ProtectedRoute>
-                          }
-          />
-        </Routes>
-    </LoginContextProvider>
-</BrowserRouter>
+              <Route path="/login" element={ <Login />}></Route>
+              <Route path="/join" element={ <Join />}></Route>
+              <Route path="/main"
+                      element={
+                              //<ProtectedRoute>
+                                <MainPage />
+                              //</ProtectedRoute>
+                              }
+              />
+            </Routes>
+        </LoginContextProvider>
+    </BrowserRouter>
   );
 }
 
