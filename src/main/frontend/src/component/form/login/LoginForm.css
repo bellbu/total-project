@@ -20,7 +20,7 @@
 .login-form {
     display: grid;
     grid-template-columns: 1fr;
-    row-gap: 16px;
+    row-gap: 23px;
 }
 
 .login-form label {
@@ -63,6 +63,7 @@
 }
 
 .btn-login {
+    margin-top: 5px;
     background-color: #ff8787;
     color: white;
 }
@@ -88,13 +89,14 @@
 }
 
 .login-hr{
-    margin: 16px 0px !important;
+    margin: 5px 0px !important;
 }
 
 .button-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+    margin-top: 5px;
 }
 
 .button-group .btn {
@@ -102,13 +104,13 @@
 }
 
 .btn-cancel {
-    background-color: #868e96;
+    background-color: #ff8787;
     color: white;
 }
 
 .btn-cancel:hover {
-    background-color: #808790;
+    background-color: #ff7777;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(134, 142, 150, 0.35);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.35);
 }

@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import styled from "styled-components";
 import { Colors } from "../resource/Colors";
 import { Tab } from "../page/MainPage";
 import { LoginContext } from "../context/LoginContextProvider";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   width: calc(100% - 40px);
@@ -58,23 +58,31 @@ interface Props {
 }
 
 const MainTopBar = ({ setTab }: Props) => {
-  const { logout } = useContext(LoginContext); // 로그아웃 함수 가져오기
+    // isLogin  : 로그인 여부 - Y(true), N(false)
+    // logout() : 로그아웃 함수 - setLogin(false)
+    const {isLogin, login, logout} = useContext(LoginContext); // 로그아웃 함수 가져오기
+    const navigate = useNavigate(); // 페이지 이동을 위한 useNavigate 훅 사용
 
-  return (
-    <Container>
-      {/* 왼쪽 메뉴 */}
-      <LeftMenu>
-        <TextButton onClick={() => setTab(Tab.FORM)}>등록하기</TextButton>
-        <TextButton onClick={() => setTab(Tab.LIST)} style={{ marginLeft: '20px' }}>목록</TextButton>
-      </LeftMenu>
+    if (!isLogin) {
+        navigate("/login");
+    }
 
-      {/* 오른쪽 메뉴 */}
-      <RightMenu>
-        <StyledLink to="/admin">마이페이지</StyledLink>
-        <TextButton onClick={logout} style={{ marginLeft: '20px' }}>로그아웃</TextButton>
-      </RightMenu>
-    </Container>
-  );
+    return (
+        <Container>
+            {/* 왼쪽 메뉴 */}
+            <LeftMenu>
+                <TextButton onClick={() => setTab(Tab.FORM)}>홈</TextButton>
+                <TextButton onClick={() => setTab(Tab.LIST)} style={{ marginLeft: '20px' }}>회원 목록</TextButton>
+            </LeftMenu>
+
+            {/* 오른쪽 메뉴 */}
+            <RightMenu>
+                <StyledLink to="/admin">마이페이지</StyledLink>
+                <TextButton onClick={() => logout()} style={{ marginLeft: '20px' }}>로그아웃</TextButton>
+            </RightMenu>
+        </Container>
+    );
+
 };
 
 export default MainTopBar;

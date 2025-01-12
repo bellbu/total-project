@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
          * authenticationManager.authenticate()가 CustomAdminDetailService의 loadUserByUsername 메서드를 호출하여 데이터베이스에서 사용자 조회
          * 사용자 인증 시도: 성공 시 - Authentication 객체 반환 / 실패 시 - 예외 던짐
          */
-        authentication = authenticationManager.authenticate(authentication);
+        authentication = authenticationManager.authenticate(authentication); // authenticationManager: 데이터베이스에서 사용자 조회하여 계정 상태 확인 후 인증
         log.info("authentication : " + authentication);
         log.info("인증 여부 : " + authentication.isAuthenticated());
         

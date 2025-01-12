@@ -7,7 +7,7 @@ import BookReturnForm from "../../component/form/BookReturnForm";
 
 const GridContainer = styled.div`
   display: flex;
-  height: 470px;
+  height: 370px;
   gap: 40px;
   margin: 20px;
 `

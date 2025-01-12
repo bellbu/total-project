@@ -43,7 +43,7 @@ const UserRegisterForm = () => {
   return (
     <Container>
       <User />
-      <Title>사용자 등록</Title>
+      <Title>회원 등록</Title>
       <FormInput title={'이름'} value={name} onChange={setName} />
       <FormInput title={'나이'} value={age} onChange={setAge} />
       <Button label={'저장'} onClick={handleClick} />

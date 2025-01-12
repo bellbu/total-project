@@ -40,7 +40,10 @@ const LoginContextProvider = ({children}) => {
     /*-------------------------------------------------------------- */
 
     // 페이지 이동
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+
+    // 인증 로딩 상태
+    const [loading, setLoading] = useState(true);
 
     /**
      * 로그인 상태(여부) 체크
@@ -49,6 +52,7 @@ const LoginContextProvider = ({children}) => {
      * -
      */
     const loginCheck = async () => { // async (): 비동기 코드 실행
+        setLoading(true); // 로딩 시작
 
         // 쿠키에서 jwt 토큰 가져오기
         const accessToken = Cookies.get("accessToken");
@@ -61,6 +65,8 @@ const LoginContextProvider = ({children}) => {
             console.log(`쿠키에 accessToken(jwt)이 없음`)
             // 로그아웃 세팅
             logoutSetting();
+            // 로딩 종료
+            setLoading(false);
             return;
         }
 
@@ -99,12 +105,12 @@ const LoginContextProvider = ({children}) => {
         // 로그인 상태 셋팅, 업데이트
         loginSetting(data, accessToken);
 
+
     }
 
 
     // 로그인
     const login = async(email, password) => {
-
         console.log(`email : ${email}`);
         console.log(`password : ${password}`);
 
@@ -127,16 +133,14 @@ const LoginContextProvider = ({children}) => {
                 Cookies.set("accessToken", accessToken);
 
                 // 로그인 체크 (/users/{email} => userData)
-                loginCheck();
+                await loginCheck();
 
-                alert('로그인 성공');
-
-                navigate("/");
+                // 로그인 성공 시 메인 페이지 이동
+                navigate("/main");
             }
         } catch (error) {
             // 로그인 실패
-            // - 아이디 또는 비밀번호가 일치하지 않습니다.
-            alert('로그인 실패!');
+             alert("아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
     }
@@ -149,7 +153,7 @@ const LoginContextProvider = ({children}) => {
             logoutSetting();
 
             // 메인 페이지로 이동
-            navigate("/");
+            navigate("/login");
         }
     }
 
@@ -213,7 +217,8 @@ const LoginContextProvider = ({children}) => {
 
     // useEffect를 사용해 3초 뒤에 로그인 상태로 변경
     useEffect( () => {
-
+        // 로그인 체크
+        loginCheck();
     }, [])
 
     return (
