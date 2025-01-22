@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 // SpringSecurity 5.4 이하
 // public class SecurityConfig extends WebSecurityConfigurerAdapter { }
@@ -51,8 +52,10 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/").permitAll() // 루트 경로("/") 모든 사용자에게 허용
                 .requestMatchers("/login").permitAll()
-                .requestMatchers("/user/**").permitAll() //.hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/admin/**").permitAll() //.hasAnyRole("ADMIN")
+                .requestMatchers("/main").authenticated()
+                .requestMatchers(HttpMethod.POST, "/user").hasAnyRole("USER", "ADMIN") // 회원 등록은 ADMIN(관리자), USER(부관리자) 모두 가능
+                .requestMatchers("/user/**").hasRole("ADMIN") // ADMIN(관리자)는 회원 모든 요청 가능, USER(부관리자)는 회원 등록만 가능
+                .requestMatchers("/admin/**").permitAll()
                 .anyRequest().authenticated()
         );
 

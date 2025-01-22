@@ -23,13 +23,16 @@ public class AdminCreateRequest {
     private String password; // 비밀번호
 
     private Boolean emailVerified; // 이메일 검증 여부
+    
+    @NotBlank(message = "권한을 선택해주세요")
+    private String role; // 권한 추가
 
     public Admin toEntity(PasswordEncoder passwordEncoder){
         return Admin.builder() // 빌더 패턴 사용해 객체 생성
                 .email(email) // DTO email 값을 엔티티의 email 필드에 할당
                 .name(name)
                 .password(passwordEncoder.encode(password))
-                .authorities(Collections.singletonList(Authority.ROLE_ADMIN))
+                .authorities(Collections.singletonList(Authority.valueOf(role))) // role 값에 따라 권한 설정
                 .emailVerified(emailVerified)
                 .build(); // 객체 생성 완료
     }

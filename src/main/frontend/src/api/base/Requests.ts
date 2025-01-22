@@ -1,5 +1,7 @@
 import axios from "axios";
+import * as Swal from '../../api/common/alert';
 
+// RequestMethod: HTTP 요청 메서드를 열거형(enum)으로 정의
 export enum RequestMethod {
   GET = 'get',
   POST = 'post',
@@ -7,6 +9,7 @@ export enum RequestMethod {
   DELETE = 'delete'
 }
 
+// request: HTTP 요청을 axios 사용하여 수행하는 함수
 export const request = async <T>(
   method: RequestMethod,
   uri: string,
@@ -14,23 +17,33 @@ export const request = async <T>(
   data: any,
 ): Promise<T> => {
   try {
+    // JWT 토큰을 쿠키에서 가져옵니다
+    const token = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('accessToken='))
+      ?.split('=')[1];
+
     const response = await axios(uri, {
       method,
       params,
       data,
-      baseURL: '/'
+      baseURL: '/',
+      headers: {
+        // Authorization 헤더에 JWT 토큰을 추가합니다
+        ...(token && { Authorization: `Bearer ${token}` })
+      }
     })
 
     return response.data
   } catch (error: any) {
     if (error.code && error.code === 'ERR_NETWORK') {
-      alert('서버에 연결이 불가능하거나, 네트워크 오류입니다.')
+      Swal.alert('서버에 연결이 불가능하거나, 네트워크 오류입니다.')
     }
     if (error.response.status === 404) {
-      alert(`해당 URI에 대한 서버의 응답이 없습니다. : ${method} /${uri}`)
+      Swal.alert(`해당 URI에 대한 서버의 응답이 없습니다. : ${method} /${uri}`)
     }
     if (error.response.status === 500) {
-      alert('서버 내부 오류입니다.')
+      Swal.alert('서버 내부 오류입니다.')
     }
     throw new Error(error)
   }

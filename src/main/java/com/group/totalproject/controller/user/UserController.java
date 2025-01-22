@@ -4,6 +4,8 @@ import com.group.totalproject.dto.user.request.UserCreateRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
 import com.group.totalproject.service.user.UserServiceV2;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,11 +21,11 @@ public class UserController { // Controller: API와 HTTP 담당
 
     @PostMapping("/user") // 등록
     public void saveUser(@RequestBody UserCreateRequest request) { // @RequestBody: HTTP 요청의 바디에 담긴 값들을 자바객체로 변환시켜 객체에 저장
-
         userService.saveUser(request);
     }
 
     @GetMapping("/user") // 목록보기
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 'ROLE_' 접두사를 포함한 전체 권한명 사용
     public List<UserResponse> getUsers() {
         return userService.getUsers();
 

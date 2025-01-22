@@ -5,6 +5,7 @@ import {Colors} from "../../resource/Colors";
 import FormInput from "../common/FormInput";
 import Button from "../common/Button";
 import {BookApi} from "../../api/app/BookApi";
+import * as Swal from '../../api/common/alert';
 
 const Container = styled.div`
   width: 50%;
@@ -31,12 +32,12 @@ const BookBorrowForm = () => {
   const handleClick = () => {
     BookApi.postBookLoan(name, bookTitle)
       .then(data => {
-        alert('책 대출에 성공했습니다!')
-        setName('')
-        setBookTitle('')
+        Swal.alert('책 대출에 성공했습니다!');
+        setName('');
+        setBookTitle('');
       })
       .catch(error => {
-
+        Swal.alert('회원명 또는 책 이름을 확인해주세요.');
       })
   }
 
@@ -44,7 +45,7 @@ const BookBorrowForm = () => {
     <Container>
       <Borrow />
       <Title>책 대출</Title>
-      <FormInput title={'이름'} value={name} onChange={setName} />
+      <FormInput title={'회원명'} value={name} onChange={setName} />
       <FormInput title={'책 이름'} value={bookTitle} onChange={setBookTitle} />
       <Button label={'저장'} onClick={handleClick} />
     </Container>

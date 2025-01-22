@@ -25,6 +25,25 @@ public class UserServiceV2 {
     // 혹시라도 문제가 있다면 rollback; 단 IOException과 같은 Checked Exception은 롤백이 일어나지 않음
     @Transactional
     public void saveUser(UserCreateRequest request) { // 유저 저장 기능
+        // 이름 검증: null 또는 빈 문자열일 경우 예외 처리
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("이름은 필수입니다.");
+        }
+
+        // 나이 검증: null, 숫자가 아닌 값, 또는 음수일 경우 예외 처리
+        if (request.getAge() == null) {
+            throw new IllegalArgumentException("나이는 필수입니다.");
+        }
+
+        try {
+            int age = Integer.parseInt(request.getAge().toString());
+            if (age < 0) {
+                throw new IllegalArgumentException("나이는 0 이상의 숫자여야 합니다.");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("나이는 숫자만 입력 가능합니다.");
+        }
+
         userRepository.save(new User(request.getName(), request.getAge()));
     }
 

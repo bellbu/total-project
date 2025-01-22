@@ -3,6 +3,7 @@ import LoginContextConsumer from '../../context/LoginContextConsumer'
 import JoinForm from '../../component/form/join/JoinForm'
 import * as auth from '../../api/login/auth'
 import { useNavigate } from 'react-router-dom'
+import * as Swal from '../../api/common/alert';
 
 const Join = () => {
 
@@ -18,23 +19,19 @@ const Join = () => {
     try {
         response = await auth.join(form);  // 회원가입 요청(POST 요청)
     } catch (error) {
-        console.error(`${error}`);
-        console.error(`회원가입 요청 중 에러가 발생하였습니다.`);
+        const errorMessage = error.response.data;
+        Swal.alert(errorMessage);
         return; // 오류 발생 시 함수 종료
     }
 
     data = response.data; // 응답 데이터 추출
     const status = response.status; // HTTP 상태 코드 추출
-    console.log(`data : ${data}`);
-    console.log(`status : ${status}`);
 
     if(status === 200) {
-        console.log(`회원가입 성공!`);
-        alert(`회원가입 성공!`);
+        Swal.alert(`회원가입 성공!`);
         navigate("/login"); // 회원가입 성공 시 로그인 페이지 이동
     } else {
-        console.log(`회원가입 실패!`);
-        alert(`회원가입에 실패하였습니다.`)
+        Swal.alert(`회원가입에 실패하였습니다.`)
     }
 
   }

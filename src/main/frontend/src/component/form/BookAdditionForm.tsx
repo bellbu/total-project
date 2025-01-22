@@ -5,6 +5,7 @@ import {Colors} from "../../resource/Colors";
 import FormInput from "../common/FormInput";
 import Button from "../common/Button";
 import {BookApi} from "../../api/app/BookApi";
+import * as Swal from '../../api/common/alert';
 
 const Container = styled.div`
   width: 50%;
@@ -30,11 +31,11 @@ const BookAdditionForm = () => {
   const handleClick = () => {
     BookApi.postBook(bookTitle)
       .then(data => {
-        alert('책 등록에 성공했습니다!')
-        setBookTitle('')
+        Swal.alert('책 등록에 성공했습니다!');
+        setBookTitle('');
       })
       .catch(error => {
-
+        Swal.alert('오류가 발생 했습니다.',error);
       })
   }
 

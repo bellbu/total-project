@@ -3,6 +3,7 @@ package com.group.totalproject.exception;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
 @ControllerAdvice // @ControllerAdvice: 전역 예외 처리를 담당
 public class GlobalExceptionHandler {
@@ -13,4 +14,5 @@ public class GlobalExceptionHandler {
         // .body(e.getMessage()): 예외 메시지(e.getMessage())를 응답 바디로 설정
         return ResponseEntity.badRequest().body(e.getMessage());
     }
+
 }

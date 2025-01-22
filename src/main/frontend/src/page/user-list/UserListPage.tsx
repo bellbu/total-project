@@ -28,9 +28,13 @@ const UserListPage = () => {
   return (
     <Container>
       <UserListTableHeader />
-      {userList.map(item => {
-        return <UserListTableItem data={{id: item.id, name: item.name, age: item.age}} refresh={refresh} />
-      })}
+      {userList.map(item => (
+        <UserListTableItem 
+          key={item.id}
+          data={{id: item.id, name: item.name, age: item.age}} 
+          refresh={refresh} 
+        />
+      ))}
     </Container>
   );
 };

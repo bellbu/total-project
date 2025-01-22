@@ -1,9 +1,24 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import '../login/LoginForm.css';
 
 const JoinForm = ({ join }) => {
 
   const navigate = useNavigate();
+  const [isRoleOpen, setIsRoleOpen] = React.useState(false);
+  const [selectedRole, setSelectedRole] = React.useState('ROLE_ADMIN');
+  const roleRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (roleRef.current && !roleRef.current.contains(event.target)) {
+        setIsRoleOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const onJoin = (e) => {
       e.preventDefault(); // submit 기본 동작 방지
@@ -13,9 +28,9 @@ const JoinForm = ({ join }) => {
       const password = form.password.value;
       const emailVerified = form.emailVerified.value;
 
-      console.log(email, name, password, emailVerified);
+      console.log(email, name, password, emailVerified, selectedRole);
 
-      join( {email, name, password, emailVerified} ); // Join 컴포넌트의 join 함수를 호출하여 회원가입 처리
+      join({ email, name, password, emailVerified, role: selectedRole });
   }
 
   return (
@@ -55,7 +70,44 @@ const JoinForm = ({ join }) => {
                     required       
               />
             </div>
+
             {/* 이메일 인증여부 추후에 추가 */}
+
+            <div className="custom-select" ref={roleRef}>
+                <label htmlFor="role">권한</label>
+
+                <div
+                    className={`select-selected ${isRoleOpen ? 'select-arrow-active' : ''}`}
+                    onClick={() => setIsRoleOpen(!isRoleOpen)}
+                >
+                    {selectedRole === 'ROLE_ADMIN' ? '관리자' : '부관리자'}
+                </div>
+
+                {isRoleOpen && (
+                    <div className="select-items">
+                        <div
+                            className={selectedRole === 'ROLE_ADMIN' ? 'same-as-selected' : ''}
+                            onClick={() => {
+                                setSelectedRole('ROLE_ADMIN');
+                                setIsRoleOpen(false);
+                            }}
+                        >
+                            관리자
+                        </div>
+
+                        <div
+                            className={selectedRole === 'ROLE_USER' ? 'same-as-selected' : ''}
+                            onClick={() => {
+                                setSelectedRole('ROLE_USER');
+                                setIsRoleOpen(false);
+                            }}
+                        >
+                            부관리자
+                        </div>
+                    </div>
+                )}
+            </div>
+
             <input
                 type="hidden"
                 name="emailVerified"
@@ -63,7 +115,13 @@ const JoinForm = ({ join }) => {
             />
           <div className="button-group">
             <button type='submit' className='btn btn--form btn-join'>가입</button>
-            <button type='button' className='btn btn--form btn-cancel' onClick={() => navigate("/")}>취소</button>
+            <button 
+              type='button' 
+              className='btn btn--form btn-cancel' 
+              onClick={() => navigate("/login")}
+            >
+              취소
+            </button>
           </div>
       </form>
 

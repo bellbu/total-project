@@ -3,9 +3,10 @@ import api from '../api/login/api';
 import Cookies from 'js-cookie';
 import * as auth from '../api/login/auth';
 import { useNavigate } from 'react-router-dom'
+import * as Swal from '../api/common/alert';
 
-export const LoginContext = createContext(); // 새로운 Context 생성하여 로그인 상태(isLogin)와 로그아웃 함수(logout)를 전달
-                                             // LoginContext.Provider를 통해 값을 전달, 자식 컴포넌트에서 useContext(LoginContext)를 사용해 값을 가져옴
+export const LoginContext = createContext(); // LoginContext라는 새로운 컨텍스트 객체 생성
+                                             // LoginContextProvider를 통해 값을 전달, 자식 컴포넌트에서 useContext(LoginContext)를 사용해 값을 가져옴
 LoginContext.displayName = 'LoginContextName' // displayName: 컨텍스트를 디버깅할 때 표시되는 이름 지정(기본적으로 Context로 표시)
 
 /**
@@ -35,15 +36,15 @@ const LoginContextProvider = ({children}) => {
     // 권한 정보
     const [authorities, setAuthorities] = useState({isUser : false, isAdmin : false});
 
-    // 이메일 저장
+    // 이메일 저장 여부
     const [rememberEmail, setRememberEmail] = useState();
+
+    // 로그인 체크 로딩 상태
+    const [isLoading, setIsLoading] = useState(true);
     /*-------------------------------------------------------------- */
 
     // 페이지 이동
     const navigate = useNavigate();
-
-    // 인증 로딩 상태
-    const [loading, setLoading] = useState(true);
 
     /**
      * 로그인 상태(여부) 체크
@@ -52,67 +53,48 @@ const LoginContextProvider = ({children}) => {
      * -
      */
     const loginCheck = async () => { // async (): 비동기 코드 실행
-        setLoading(true); // 로딩 시작
-
-        // 쿠키에서 jwt 토큰 가져오기
+        setIsLoading(true); // 로그인 체크 로딩 시작
+        
         const accessToken = Cookies.get("accessToken");
-        console.log(`accessToken : ${accessToken}`);
 
-        // header에 jwt 담기
-
-        // accessToken (jwt)이 없음
         if(!accessToken) {
-            console.log(`쿠키에 accessToken(jwt)이 없음`)
-            // 로그아웃 세팅
-            logoutSetting();
-            // 로딩 종료
-            setLoading(false);
+            logoutSetting(); // JWT 토큰없으면 로그아웃 처리
+            setIsLoading(false); // 로그인 체크 로딩 완료
             return;
         }
 
-
-       /**
-        *  accessToken(jwt)이 있는 경우 헤더에 jwt 담기
-        * - axios 헤더 추가: api 요청 시 인증을 위함
-        *   1) api.defaults.headers.common: axios 모든 요청 api에 공통으로 사용할 헤더 설정
-        *   2) Authorization: Authorization 헤더 추가
-        */
+        /**
+         *  accessToken(jwt)이 있는 경우 헤더에 jwt 담기
+         * - axios 헤더 추가: api 요청 시 인증을 위함
+         *   1) api.defaults.headers.common: axios 모든 요청 api에 공통으로 사용할 헤더 설정
+         *   2) Authorization: Authorization 헤더 추가
+         *   3) controller에서 파라미터에 AuthenticationPrincipal 어노테이션을 사용하면 JWT에서 사용자 정보를 자동으로 가져옴
+         */
         api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
 
         // 사용자 정보 요청
         let response
         let data
+
         try {
-            response = await auth.info();
+            response = await auth.info(); // auth.info(): api 호출하여 관리자 정보 조회, api 요청 헤더에 JWT 정보 담겨있음
+            data = response.data;
+            
+            if(data === 'UNAUTHRIZED' || response.status === 401) {  // 요청 실패 시 로그 아웃 처리
+                logoutSetting();
+            } else { // 요청 성공 시 로그인 설정
+                loginSetting(data, accessToken);
+            }
         } catch (error) {
             console.log(`error : ${error}`);
-            console.log(`status : ${response.status}`);
-            return;
+            logoutSetting();
+        } finally {
+            setIsLoading(false); // 로그인 체크 로딩 완료
         }
-
-        data = response.data;
-        console.log(`data : ${data}`);
-
-        // 인증 실패
-        if(data == 'UNAUTHRIZED' || response.status == 401) {
-            console.error(`accessToken (jwt)이 만료되었거나 인증에 실패하였습니다.`);
-            return;
-        }
-
-        // 인증 성공
-        console.log(`accessToken(jwt) 토큰으로 사용자 인증정보 요청 성공!`)
-
-        // 로그인 상태 셋팅, 업데이트
-        loginSetting(data, accessToken);
-
-
     }
-
 
     // 로그인
     const login = async(email, password) => {
-        console.log(`email : ${email}`);
-        console.log(`password : ${password}`);
 
         try {
             const response = await auth.login(email, password);
@@ -122,39 +104,47 @@ const LoginContextProvider = ({children}) => {
             const authorization = headers.authorization;
             const accessToken = authorization.replace("Bearer ", ""); // jwt
 
-            console.log(`data : ${data}`);
-            console.log(`status : ${status}`);
-            console.log(`headers : ${headers}`);
-            console.log(`jwt : ${accessToken}`);
-
             // 로그인 성공
             if(status === 200) {
                 // 쿠키에 accessToken(jwt) 저장
                 Cookies.set("accessToken", accessToken);
 
                 // 로그인 체크 (/users/{email} => userData)
-                await loginCheck();
+                loginCheck();
 
-                // 로그인 성공 시 메인 페이지 이동
                 navigate("/main");
+
             }
         } catch (error) {
             // 로그인 실패
-             alert("아이디 혹은 비밀번호가 맞지 않습니다.");
+             Swal.alert(`로그인 실패`, "아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
     }
 
-    // 로그아웃
-    const logout = () => {
-        const check = window.confirm(`로그아웃하시겠습니까?`)
-        if(check){
+    // 로그아웃(기본값: force=false)
+    const logout = (force=false) => {
+
+        if( force ) { // force=true인 경우 강제 로그아웃(확인 창X) ex) 세션 만료, 보안 문제 등 사용자가 강제로 로그아웃되어야 하는 경우
             // 로그아웃 세팅
             logoutSetting();
 
-            // 메인 페이지로 이동
-            navigate("/login");
+            // 페이지 이동 ➡ "/" (메인)
+            navigate("/");
+            return
         }
+
+        Swal.confirm("로그아웃하시겠습니까?", "로그아웃을 진행합니다.", "warning", // force=false인 경우 일반 로그아웃(확인 창O)
+                (result) => {
+                    if( result.isConfirmed ) {
+                        // 로그아웃 세팅
+                        logoutSetting();
+
+                        // 메인 페이지로 이동
+                        navigate("/");
+                    }
+                }
+        )
     }
 
     // 로그인 세팅
@@ -162,14 +152,10 @@ const LoginContextProvider = ({children}) => {
     const loginSetting = (adminData, accessToken) => {
 
         // 객체 구조 분해 할당
-        const {id, email, authorities} = adminData;
+        const {id, email, name, authorities} = adminData;
 
         // 필요없음
         // const roleList = authorities.map((auth) => auth.authorities);
-
-        console.log(`no : ${id}`);
-        console.log(`email : ${email}`);
-        console.log(`authorities : ${authorities}`);
 
         // 필요없음
         // console.log(`roleList : ${roleList}`);
@@ -180,15 +166,15 @@ const LoginContextProvider = ({children}) => {
         // 로그인 여부 true 세팅
         setLogin(true);
 
-        // 유저 정보 세팅
-        const updatedAdminInfo = {id, email, authorities};
+        // 유저 정보 세팅 (name 포함)
+        const updatedAdminInfo = {id, email, name, authorities};
         setAdminInfo(updatedAdminInfo);
 
         // 권한 정보 세팅
         const updatedAuthorities = {isUser : false, isAdmin : false};
         authorities.forEach((role) => {
-            if(role == 'ROLE_USER') updatedAuthorities.isUser = true;
-            if(role == 'ROLE_ADMIN') updatedAuthorities.isAdmin = true;
+            if(role === 'ROLE_USER') updatedAuthorities.isUser = true;
+            if(role === 'ROLE_ADMIN') updatedAuthorities.isAdmin = true;
         });
         setAuthorities(updatedAuthorities);
     }
@@ -215,16 +201,16 @@ const LoginContextProvider = ({children}) => {
     }
 
 
-    // useEffect를 사용해 3초 뒤에 로그인 상태로 변경
+    // useEffect: React 컴포넌트가 렌더링 될 때마다 실행되는 Hook
     useEffect( () => {
         // 로그인 체크
         loginCheck();
-    }, [])
+    }, []);
 
     return (
         // LoginContext.Provider를 사용해 데이터와 함수를 Context에 전달
         // LoginContextProvider의 자식 컴포넌트들이 Context 값을 사용할 수 있음
-        <LoginContext.Provider value={ {isLogin, adminInfo, authorities, login, logout} }>
+        <LoginContext.Provider value={{ isLogin, adminInfo, authorities, login, loginCheck, logout, isLoading }}>
             {children}  
         </LoginContext.Provider>
     )

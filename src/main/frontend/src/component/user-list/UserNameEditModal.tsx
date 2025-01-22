@@ -70,12 +70,12 @@ const UserNameEditModalContent = ({userId, currentName, refresh, onClose}: Props
     <Container>
       <Background onClick={onClose}/>
       <Content>
-        <Title>사용자 정보 수정하기</Title>
+        <Title>회원 정보 수정하기</Title>
         <div style={{display: 'flex', flexDirection: 'row', gap: '8px', marginBottom: '8px'}}>
-          <p style={{fontSize: '14px', fontWeight: '400'}}>현재 이름</p>
-          <p style={{fontSize: '14px', fontWeight: '600'}}>{currentName}</p>
+          <p style={{fontSize: '15px', fontWeight: '400'}}>현재 이름</p>
+          <p style={{fontSize: '15px', fontWeight: '600'}}>{currentName}</p>
         </div>
-        <FormInput title={'새 이름'} value={newName} onChange={setNewName} width={'200px'}/>
+        <FormInput title={'새 이름'} value={newName} onChange={setNewName} width={'230px'} fontSize={'16px'} />
         <Button label={'수정'} onClick={() => {
           edit()
         }} marginTop={'8px'}/>

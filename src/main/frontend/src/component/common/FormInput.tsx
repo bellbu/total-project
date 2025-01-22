@@ -19,8 +19,8 @@ const Container = styled.div<{width: string}>`
   margin-bottom: 12px;
 `;
 
-const Title = styled.p`
-  font-size: 18px;
+const Title = styled.p<{fontSize?: string}>`
+  font-size: ${props => props.fontSize ?? '17px'};
   font-weight: 700;
   color: black;
 `;
@@ -36,13 +36,14 @@ interface Props {
   title: string;
   value: string;
   onChange: (_: string) => void;
-  width?: string
+  width?: string;
+  fontSize?: string;
 }
 
-const FormInput = ({ title, value, onChange, width }: Props) => {
+const FormInput = ({ title, value, onChange, width, fontSize }: Props) => {
   return (
     <Container width={width ?? '30%'}>
-      <Title>{title}</Title>
+      <Title fontSize={fontSize}>{title}</Title>
       <Input value={value} onChange={e => {
         onChange(e.target.value)
       }} />

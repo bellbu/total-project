@@ -1,13 +1,13 @@
 import React, { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'; // 추가
-import styles from './LoginForm.css';
+import './LoginForm.css';
 import { LoginContext } from '../../../context/LoginContextProvider'
 
 const LoginForm = () => {
 
     const navigate = useNavigate();
 
-    const {login} = useContext(LoginContext); // LoginContextProvider에서 생성된 LoginContext 사용
+    const {login} = useContext(LoginContext); // LoginContextProvider에서 생성된 LoginContext의 login 함수 사용
 
     const onLogin = (e) => { // 사용자가 form을 submit하면 onLogin 함수 호출
         e.preventDefault(); //  기본 이벤트 실행 방지 ※ <submit>태그의 경우 해당 페이지 새로고침 방지, <a>태그의 경우 링크 페이지 이동 방지
@@ -16,9 +16,7 @@ const LoginForm = () => {
         const email = form.email.value;
         const password = form.password.value;
 
-        // 데이터 세팅
-
-        // 로그인 요청
+        // 로그인 요청: LoginContext의 login 함수 호출
         login(email, password);
     }
 

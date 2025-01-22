@@ -26,20 +26,55 @@
 .login-form label {
     display: block;
     margin-bottom: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
 }
 
 .login-form input {
     width: 100%;
     padding: 1.2rem;
     border-radius: 9px;
-    border: none;
+    border: 2px solid transparent;
+    background-color: white;
+    transition: all 0.3s;
 }
 
 .login-form input:focus {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(253, 242, 233, 0.5);
+    border: 2px solid #748ffc;
+    box-shadow: 0 0 10px rgba(116, 143, 252, 0.2);
+    transform: translateY(-2px);
 }
 
+.login-form select {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 9px;
+    border: 2px solid transparent;
+    font-size: 16px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+.login-form select:focus {
+    outline: none;
+    border: 2px solid #748ffc;
+    box-shadow: 0 0 10px rgba(116, 143, 252, 0.2);
+    transform: translateY(-2px);
+}
+
+.login-form input:focus + label,
+.login-form select:focus + label {
+    color: #748ffc;
+}
 
 .btn--form {
     align-self: end;
@@ -113,4 +148,116 @@
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 107, 107, 0.35);
+}
+
+/* 셀렉트 박스 옵션 기본 스타일 */
+.login-form select option {
+    padding: 16px;
+    font-size: 16px;
+    background-color: white;
+    color: #333;
+}
+
+/* 옵션 호버 시 스타일 - 더 진한 색상으로 변경 */
+.login-form select option:hover {
+    background-color: #5c7cfa !important;  /* 더 진한 파란색으로 변경 */
+    color: white !important;
+}
+
+/* 선택된 옵션 스타일 */
+.login-form select option:checked {
+    background-color: #f1f3ff;
+    color: #748ffc;
+}
+
+/* 셀렉트 박스 활성화 시 스타일 */
+.login-form select:focus {
+    outline: none;
+    border: 2px solid #748ffc;
+    box-shadow: 0 0 10px rgba(116, 143, 252, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Firefox 포커스 링 스타일 제거 */
+select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #000;
+}
+
+/* IE에서 기본 화살표 숨기기 */
+.login-form select::-ms-expand {
+    display: none;
+}
+
+/* 커스텀 셀렉트 박스 스타일링 */
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.select-selected {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 9px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+  font-size: 15px;
+}
+
+.select-selected:after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  border-top-color: #333;
+  transition: all 0.3s;
+}
+
+.select-arrow-active:after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.select-items {
+  position: absolute;
+  background-color: white;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  margin-top: 5px;
+  border-radius: 9px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* 드롭다운 아이템 기본 및 호버 스타일 */
+.select-items div {
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+  color: #333;
+  font-size: 15px;
+}
+
+/* 드롭다운 아이템 호버 효과 */
+.select-items div:hover {
+  background-color: #5c7cfa;
+  color: white;
+}
+
+/* 선택된 아이템 스타일 제거 */
+.same-as-selected {
+  /* 기존 스타일 제거 */
+}
+
+.select-selected:hover {
+  border: 2px solid #748ffc;
+  box-shadow: 0 0 10px rgba(116, 143, 252, 0.2);
 }
