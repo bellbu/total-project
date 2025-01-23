@@ -25,9 +25,21 @@ public class UserServiceV2 {
     // 혹시라도 문제가 있다면 rollback; 단 IOException과 같은 Checked Exception은 롤백이 일어나지 않음
     @Transactional
     public void saveUser(UserCreateRequest request) { // 유저 저장 기능
+
         // 이름 검증: null 또는 빈 문자열일 경우 예외 처리
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("이름은 필수입니다.");
+        }
+
+        // 이름 검증: 영어 또는 한글로 시작하고, 뒤에 숫자가 올 수 있는 패턴만 허용
+        String nameRegex = "^[a-zA-Z가-힣]+[0-9]*$";
+        if (!request.getName().matches(nameRegex)) {
+            throw new IllegalArgumentException("이름은 영어 또는 한글로 시작하고, \n뒤에 숫자를 포함할 수 있습니다.");
+        }
+
+        // 이름 중복 검사
+        if (userRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("이미 존재하는 이름입니다. \n다른 이름을 사용해주세요.");
         }
 
         // 나이 검증: null, 숫자가 아닌 값, 또는 음수일 경우 예외 처리
@@ -37,8 +49,8 @@ public class UserServiceV2 {
 
         try {
             int age = Integer.parseInt(request.getAge().toString());
-            if (age < 0) {
-                throw new IllegalArgumentException("나이는 0 이상의 숫자여야 합니다.");
+            if (age < 1) {
+                throw new IllegalArgumentException("나이는 1 이상의 숫자여야 합니다.");
             }
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("나이는 숫자만 입력 가능합니다.");
@@ -56,10 +68,29 @@ public class UserServiceV2 {
     }
     @Transactional
     public void updateUser(UserUpdateRequest request) {
-        User user = userRepository.findById(request.getId()) // findById: id를 기준으로 1개의 데이터를 가져옴. Optional<User> 형태로 반환
-                .orElseThrow(IllegalArgumentException::new); // Optional의 orElseThrow: 데이터가 없는 경우(해당 id가 없는 경우) 예외를 던짐
 
-        user.updateName(request.getName()); // 객체 이름 변경
+        // 1. 이름 검증: null 또는 빈 문자열일 경우 예외 처리
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("이름은 필수입니다.");
+        }
+
+        // 2. 이름 검증: 영어 또는 한글로 시작하고, 뒤에 숫자가 올 수 있는 패턴만 허용
+        String nameRegex = "^[a-zA-Z가-힣]+[0-9]*$";
+        if (!request.getName().matches(nameRegex)) {
+            throw new IllegalArgumentException("이름은 영어 또는 한글로 시작하고, \n뒤에 숫자를 포함할 수 있습니다.");
+        }
+
+        // 3. 이름 중복 검사
+        if (userRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("이미 사용 중인 이름입니다.");
+        }
+
+        // 4. 기존 회원 정보 가져오기
+        User user = userRepository.findById(request.getId()) // findById: id를 기준으로 1개의 데이터를 가져옴. Optional<User> 형태로 반환
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다. ID: " + request.getId())); // Optional의 orElseThrow: 데이터가 없는 경우(해당 id가 없는 경우) 예외를 던짐
+
+        // 4. 객체 이름 변경
+        user.updateName(request.getName());
     }
 
     @Transactional

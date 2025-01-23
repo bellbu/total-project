@@ -30,15 +30,23 @@ const UserRegisterForm = () => {
   const [age, setAge] = useState<string>('');
 
   const handleClick = () => {
-/*     if (!name.trim() || !age.trim()) { // trim()을 사용하여 공백 제거
+
+    if (!name.trim() || !age.trim()) { // trim()을 사용하여 공백 제거
         Swal.alert('이름과 나이를 입력해 주세요.');
+        return;
+    }
+
+    // 이름 유효성 검사: 영어(알파벳) 또는 한글만 허용
+    const nameRegex = /^[a-zA-Z가-힣]+[0-9]*$/;
+    if (!nameRegex.test(name)) {
+        Swal.alert('이름은 영어 또는 한글로 시작하고, \n뒤에 숫자를 입력할 수 있습니다.');
         return;
     }
 
     if (isNaN(parseInt(age))) { // isNaN: 값이 숫자인지 아닌지를 확인하는 함수(숫자가 아닌 경우 true 반환)
         Swal.alert('나이는 숫자만 입력 가능합니다.');
         return;
-    } */
+    }
 
     UserApi.postUser(name, isNaN(parseInt(age)) ? null : parseInt(age))
       .then(data => {
@@ -47,10 +55,9 @@ const UserRegisterForm = () => {
         setAge('');
       })
       .catch(error => {
-        console.log("error : ",error);
         // 백엔드에서 받은 에러 메시지를 화면에 표시
-        const errorMessage = error.response?.data || '오류가 발생했습니다.'; // 서버 메시지를 안전하게 접근
-        Swal.alert(errorMessage); // 서버에서 전달된 메시지 출력
+        const errorMessage = error?.data || error.message || '오류가 발생했습니다.';
+        Swal.alert(errorMessage);
       })
   }
 

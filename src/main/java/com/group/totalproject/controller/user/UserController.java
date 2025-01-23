@@ -20,8 +20,13 @@ public class UserController { // Controller: API와 HTTP 담당
     }
 
     @PostMapping("/user") // 등록
-    public void saveUser(@RequestBody UserCreateRequest request) { // @RequestBody: HTTP 요청의 바디에 담긴 값들을 자바객체로 변환시켜 객체에 저장
-        userService.saveUser(request);
+    public ResponseEntity<?> saveUser(@RequestBody UserCreateRequest request) { // @RequestBody: HTTP 요청의 바디에 담긴 값들을 자바객체로 변환시켜 객체에 저장
+        try {
+            userService.saveUser(request);
+            return ResponseEntity.ok("회원 등록이 완료되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/user") // 목록보기
@@ -61,8 +66,13 @@ public class UserController { // Controller: API와 HTTP 담당
     }
 
     @PutMapping("/user") // 수정
-    public void updateUser(@RequestBody UserUpdateRequest request) { // 객체화
-        userService.updateUser(request);
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest request) { // 객체화
+        try {
+            userService.updateUser(request);
+            return ResponseEntity.ok("회원 이름이 수정되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/user") // 삭제

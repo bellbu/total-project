@@ -1,5 +1,6 @@
 package com.group.totalproject.domain.user;
 
+import com.group.totalproject.domain.book.Book;
 import com.group.totalproject.domain.user.loanhistory.UserLoanHistory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -51,10 +52,27 @@ public class User {
         this.name = name;
     }
 
+    public void loanBook(Book book) { // 도메인 계층에 비즈니스 로직 작성함
+        this.userLoanHistories.add(new UserLoanHistory(this, book));
+    }
+
+    /*
+    // ※ 책 이름으로 히스토리 저장하는 경우
     public void loanBook(String bookName) { // 도메인 계층에 비즈니스 로직 작성함
         this.userLoanHistories.add(new UserLoanHistory(this, bookName));
     }
+    */
 
+    public void returnBook(Book book) {
+        UserLoanHistory targetHistory = this.userLoanHistories.stream() // (select * from user_loan_history where user_id = ?)
+                .filter(history -> history.getBook().equals(book))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
+        targetHistory.doReturn();
+    }
+
+    /*
+    // ※ 책 이름으로 히스토리 저장하는 경우
     public void returnBook(String bookName) {
         UserLoanHistory targetHistory = this.userLoanHistories.stream() // (select * from user_loan_history where user_id = ?)
                 .filter(history -> history.getBookName().equals(bookName))
@@ -62,5 +80,6 @@ public class User {
                 .orElseThrow(IllegalArgumentException::new);
         targetHistory.doReturn();
     }
+    */
 
 }
