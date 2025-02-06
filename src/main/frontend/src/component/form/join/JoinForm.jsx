@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../login/LoginForm.css';
+import * as Swal from '../../../api/common/alert';
 
 const JoinForm = ({ join }) => {
 
@@ -21,14 +22,33 @@ const JoinForm = ({ join }) => {
   }, []);
 
   const onJoin = (e) => {
+
       e.preventDefault(); // submit 기본 동작 방지
+
       const form = e.target;
-      const email = form.email.value;
-      const name = form.name.value;
+      const email = form.email.value.trim();
+      const name = form.name.value.trim();
       const password = form.password.value;
       const emailVerified = form.emailVerified.value;
 
-      console.log(email, name, password, emailVerified, selectedRole);
+      // 이메일 정규식 검사
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+            Swal.alert("올바른 이메일 형식을 입력해주세요.");
+            return;
+      }
+
+      // 빈값 유효성 검사
+      if(!email || !name || !password) {
+        Swal.alert('모든 필드를 입력해 주세요.')
+        return;
+      }
+
+      // 권한 선택 검사
+      if (!selectedRole) {
+          Swal.alert("권한을 선택해주세요.");
+          return;
+      }
 
       join({ email, name, password, emailVerified, role: selectedRole });
   }

@@ -134,17 +134,17 @@ const LoginContextProvider = ({children}) => {
             return
         }
 
-        Swal.confirm("로그아웃하시겠습니까?", "로그아웃을 진행합니다.", "warning", // force=false인 경우 일반 로그아웃(확인 창O)
-                (result) => {
-                    if( result.isConfirmed ) {
-                        // 로그아웃 세팅
-                        logoutSetting();
+        // force=false인 경우 일반 로그아웃(확인 창O)
+        Swal.confirm("로그아웃하시겠습니까?", "로그아웃이 진행됩니다.", "warning", (result) => {
+            if( result.isConfirmed ) {
+                // 로그아웃 세팅
+                logoutSetting();
 
-                        // 메인 페이지로 이동
-                        navigate("/");
-                    }
-                }
-        )
+                // 메인 페이지로 이동
+                navigate("/");
+            }
+        });
+
     }
 
     // 로그인 세팅

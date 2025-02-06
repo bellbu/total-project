@@ -53,9 +53,9 @@ export const confirm = (title, text, icon, callback) => {
         icon: icon,
         showCancelButton: true,
         cancelButtonColor: "#d33",
-        cancelButtonText: "No",
+        cancelButtonText: "취소",
         confirmButtonColor: "#3085d6",
-        confirmButtonText: "Yes",
+        confirmButtonText: "확인",
         customClass: {
             title: 'swal2-title',
             htmlContainer: 'swal2-html-container',

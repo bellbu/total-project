@@ -19,16 +19,25 @@ const Title = styled.p`
   font-size: 20px;
   font-weight: 800;
   color: ${Colors.primaryColor};
-`
+`;
 
-const UserListTableHeader = () => {
-  return (
-    <Container>
-      <Title>회원 이름</Title>
-      <Title style={{ left: '22%' }}>나이</Title>
-      <Title style={{ left: '75%' }}>총 회원수</Title>
-    </Container>
-  );
+const TitleRight = styled.p`
+  margin-left: auto;
+  font-size: 20px;
+  font-weight: 800;
+  color: ${Colors.primaryColor};
+`;
+
+const UserListTableHeader = ({ userCount }: { userCount: number } ) => {
+    const formattedCount = userCount.toLocaleString();
+
+    return (
+        <Container>
+            <Title>회원 이름</Title>
+            <Title style={{ left: '22%' }}>나이</Title>
+            <TitleRight>총 회원수 : {formattedCount} 명</TitleRight>
+        </Container>
+    );
 };
 
 export default UserListTableHeader;

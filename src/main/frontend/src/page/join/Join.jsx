@@ -11,7 +11,6 @@ const Join = () => {
 
   // 관리자 가입 요청
   const join = async (form) => {  // form: 사용자 입력 데이터 객체  ex) { email, name, password }
-    console.log(form);
 
     let response; // 회원가입 API 응답 객체
     let data;     // 회원가입 API 응답 데이터: SUCCESS or FAIL

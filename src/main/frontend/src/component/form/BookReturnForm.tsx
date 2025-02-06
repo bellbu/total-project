@@ -30,6 +30,12 @@ const BookReturnForm = () => {
   const [bookTitle, setBookTitle] = useState<string>('');
 
   const handleClick = () => {
+
+    if (!name.trim() || !bookTitle.trim()) { // trim()을 사용하여 공백 제거
+        Swal.alert('회원명과 책 이름을 입력해 주세요.');
+        return;
+    }
+
     BookApi.putBookReturn(name, bookTitle)
       .then(data => {
         Swal.alert('책 반납에 성공했습니다!');
@@ -37,8 +43,12 @@ const BookReturnForm = () => {
         setBookTitle('');
       })
       .catch(error => {
-        Swal.alert('회원명 또는 책 이름을 확인해주세요.');
+          console.log("에러 확인~~~~~~~~ : ", error);
+        // 백엔드에서 받은 에러 메시지 화면 표시
+        const errorMessage = error?.data || error.message || '오류가 발생했습니다.';
+        Swal.alert(errorMessage);
       })
+
   }
 
   return (

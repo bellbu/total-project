@@ -37,11 +37,8 @@ public class AdminController { // JWT 토큰 생성 RestController
         if (customAdmin == null) {
             throw new IllegalStateException("CustomAdmin is null");
         }
-        log.info("::::: customUser :::::");
-        log.info("customAdmin : "+ customAdmin);
 
         Admin admin = customAdmin.getAdmin();
-        log.info("admin : " + admin);
 
         // 인증된 사용자 정보
         if( admin != null )
@@ -56,17 +53,20 @@ public class AdminController { // JWT 토큰 생성 RestController
      */
     @PostMapping("")
     public ResponseEntity<?> saveAdmin(@RequestBody AdminCreateRequest request) throws Exception {
-        log.info("[POST] - /users");
-        int result = adminService.saveAdmin(request);
 
-        if( result > 0 ) {
-            log.info("관리자 가입 성공! - SUCCESS");
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+        try {
+            int result = adminService.saveAdmin(request);
+
+            if( result > 0 ) {
+                return ResponseEntity.ok("SUCCESS");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FAIL");
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        else {
-            log.info("관리자 가입 실패! - FAIL");
-            return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
-        }
+
+
     }
 
 
@@ -76,14 +76,11 @@ public class AdminController { // JWT 토큰 생성 RestController
     @Secured("ROLE_ADMIN") // ADMIN 권한 설정
     @PutMapping("")
     public ResponseEntity<?> updateAdmin(@RequestBody AdminUpdateRequest request) throws Exception {
-        log.info("[PUT] - /users");
         int result = adminService.updateAdmin(request);
 
         if( result > 0 ) {
-            log.info("관리자 수정 성공! - SUCCESS");
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         } else {
-            log.info("관리자 수정 실패! - FAIL");
             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
         }
     }
@@ -95,16 +92,13 @@ public class AdminController { // JWT 토큰 생성 RestController
     @Secured("ROLE_ADMIN") // Admin 권한 설정
     @DeleteMapping("/{email}")
     public ResponseEntity<?> destroy(@PathVariable("email") String email) throws Exception {
-        log.info("[DELETE] - /admin/{email}");
 
         int result = adminService.deleteAdmin(email);
 
         if( result > 0 ) {
-            log.info("관리자 삭제 성공! - SUCCESS");
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }
         else {
-            log.info("관리자 삭제 실패! - FAIL");
             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
         }
 

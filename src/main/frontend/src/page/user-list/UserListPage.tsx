@@ -27,7 +27,7 @@ const UserListPage = () => {
 
   return (
     <Container>
-      <UserListTableHeader />
+      <UserListTableHeader userCount={userList.length} />
       {userList.map(item => (
         <UserListTableItem 
           key={item.id}

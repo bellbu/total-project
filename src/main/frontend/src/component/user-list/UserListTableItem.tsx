@@ -4,6 +4,7 @@ import {UserData} from "../../model/UserData";
 import Button from "../common/Button";
 import {UserApi} from "../../api/app/UserApi";
 import UserNameEditModal from "./UserNameEditModal";
+import * as Swal from "../../api/common/alert";
 
 const Container = styled.div`
   position: relative;
@@ -52,10 +53,20 @@ const UserListTableItem = ({ data, refresh }: Props) => {
   const [isEditModalOpen, setEditModalOpen] = useState(false)
 
   const deleteUser = () => {
-    UserApi.deleteUser(data.name)
-      .then(() => {
-        refresh()
-      })
+    Swal.confirm("회원 삭제", "정말로 삭제하시겠습니까?", "warning", (result: any) => {
+        if (result.isConfirmed) {
+            UserApi.deleteUser(data.name)
+                .then(() => {
+                    refresh()
+                    Swal.alert("삭제 완료", "사용자가 삭제되었습니다.", "success");
+                })
+                .catch(error => {
+                    // 백엔드에서 받은 에러 메시지 화면 표시
+                    const errorMessage = error?.data || error.message || '오류가 발생했습니다.';
+                    Swal.alert(errorMessage);
+                })
+        }
+    });
   }
 
   return (

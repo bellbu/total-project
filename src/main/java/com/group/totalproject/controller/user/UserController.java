@@ -76,8 +76,13 @@ public class UserController { // Controller: API와 HTTP 담당
     }
 
     @DeleteMapping("/user") // 삭제
-    public void deleteUser(@RequestParam("name") String name) {
-        userService.deleteUser(name);
+    public ResponseEntity<?> deleteUser(@RequestParam("name") String name) {
+        try {
+            userService.deleteUser(name);
+            return ResponseEntity.ok("회원이 삭제되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 

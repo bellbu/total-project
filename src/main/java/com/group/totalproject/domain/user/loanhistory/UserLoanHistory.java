@@ -4,6 +4,8 @@ import com.group.totalproject.domain.book.Book;
 import com.group.totalproject.domain.user.User;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 
 @Entity
 public class UserLoanHistory {
@@ -48,6 +50,10 @@ public class UserLoanHistory {
 
     public void doReturn() {
         this.isReturn = true;
+    }
+
+    public boolean isReturn() {
+        return this.isReturn;
     }
 
     public Book getBook() {

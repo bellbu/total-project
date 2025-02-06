@@ -63,21 +63,12 @@ public class User {
     }
     */
 
-    public void returnBook(Book book) {
-        UserLoanHistory targetHistory = this.userLoanHistories.stream() // (select * from user_loan_history where user_id = ?)
-                .filter(history -> history.getBook().equals(book))
-                .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
-        targetHistory.doReturn();
-    }
-
     /*
-    // ※ 책 이름으로 히스토리 저장하는 경우
-    public void returnBook(String bookName) {
-        UserLoanHistory targetHistory = this.userLoanHistories.stream() // (select * from user_loan_history where user_id = ?)
-                .filter(history -> history.getBookName().equals(bookName))
-                .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+    public void returnBook(Book book) {
+        UserLoanHistory targetHistory = this.userLoanHistories.stream() // .stream(): 리스트를 스트림으로 변환 => "select * from user_loan_history where user_id = ?" 와 동일
+                .filter(history -> history.getBook().equals(book) && !history.isReturn())
+                .findFirst() // .findFirst(): 필터링된 결과 중 첫 번째 값을 가져옴
+                .orElseThrow(IllegalArgumentException::new); // .orElseThrow(): 책을 찾지 못한 경우 예외처리
         targetHistory.doReturn();
     }
     */

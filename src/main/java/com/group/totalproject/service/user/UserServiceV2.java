@@ -2,9 +2,11 @@ package com.group.totalproject.service.user;
 
 import com.group.totalproject.domain.user.User;
 import com.group.totalproject.domain.user.UserRepository;
+import com.group.totalproject.domain.user.loanhistory.UserLoanHistoryRepository;
 import com.group.totalproject.dto.user.request.UserCreateRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,13 +14,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor // final이 붙은 필드의 생성자를 자동으로 생성
 public class UserServiceV2 {
 
     private final UserRepository userRepository; // UserRepository는 JpaRepository를 상속됨
-
-    public UserServiceV2(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final UserLoanHistoryRepository userLoanHistoryRepository;
 
     // 아래 있는 함수가 시작될 때 start transaction;을 해준다 (트랜잭션을 시작!)
     // 함수가 예외 없이 잘 끝났다면 commit;
@@ -34,7 +34,7 @@ public class UserServiceV2 {
         // 이름 검증: 영어 또는 한글로 시작하고, 뒤에 숫자가 올 수 있는 패턴만 허용
         String nameRegex = "^[a-zA-Z가-힣]+[0-9]*$";
         if (!request.getName().matches(nameRegex)) {
-            throw new IllegalArgumentException("이름은 영어 또는 한글로 시작하고, \n뒤에 숫자를 포함할 수 있습니다.");
+            throw new IllegalArgumentException("이름은 영어 또는 한글로 시작해야 하며, 숫자를 포함할 수 있습니다. \n단, 띄워쓰기는 사용할 수 없습니다.");
         }
 
         // 이름 중복 검사
@@ -95,8 +95,16 @@ public class UserServiceV2 {
 
     @Transactional
     public void deleteUser(String name) {
+
         User user = userRepository.findByName(name)
                 .orElseThrow(IllegalArgumentException::new);
+
+        // 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
+        if (userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId())) {
+            throw new IllegalStateException("대출 중인 책이 있어 삭제할 수 없습니다.");
+        }
+
         userRepository.delete(user);
+
     }
 }

@@ -21,12 +21,16 @@ public class AdminService {
     // 관리자 등록
     @Transactional
     public int saveAdmin(AdminCreateRequest request) {
+
         // 유효성 검사
+        validateRequest(request);
+
         if (adminRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 가입되어 있는 이메일입니다.");
+            throw new IllegalArgumentException("이미 가입되어 있는 이메일입니다.");
         }
-        if (Boolean.FALSE.equals(request.getEmailVerified())) {
-            throw new RuntimeException("이메일 검증이 필요합니다.");
+
+        if (!Boolean.TRUE.equals(request.getEmailVerified())) {
+            throw new IllegalArgumentException("이메일 인증이 필요합니다.");
         }
 
         // 관리자 엔티티 생성
@@ -37,6 +41,27 @@ public class AdminService {
 
         // 저장 성공 여부 반환
         return savedAdmin.getId() != null ? 1 : 0;
+    }
+
+    // 유효성 검사 메서드
+    private void validateRequest(AdminCreateRequest request) {
+
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("이메일을 입력해 주세요.");
+        }
+
+        if (!request.getEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("올바른 이메일 형식을 입력해 주세요.");
+        }
+
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("이름을 입력해 주세요.");
+        }
+
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("비밀번호를 입력해 주세요.");
+        }
+
     }
 
     // 관리자 정보 수정(이름, 메일검증여부)

@@ -30,13 +30,23 @@ public class BookController {
     }
 
     @PostMapping("/book/loan")
-    public void loanBook(@RequestBody BookLoanRequest request) {
-        bookService.loanBook(request);
+    public ResponseEntity<?> loanBook(@RequestBody BookLoanRequest request) {
+        try {
+            bookService.loanBook(request);
+            return ResponseEntity.ok("책 대출이 완료되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/book/return")
-    public void returnBook(@RequestBody BookReturnRequest request) {
-        bookService.returnBook(request);
+    public ResponseEntity<?> returnBook(@RequestBody BookReturnRequest request) {
+        try {
+            bookService.returnBook(request);
+            return ResponseEntity.ok("책 반납이 완료되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }
