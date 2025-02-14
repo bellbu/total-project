@@ -63,7 +63,7 @@ const UserListTableItem = ({ data, refresh }: Props) => {
                 .catch(error => {
                     // 백엔드에서 받은 에러 메시지 화면 표시
                     const errorMessage = error?.data || error.message || '오류가 발생했습니다.';
-                    Swal.alert(errorMessage);
+                    Swal.alert(errorMessage, '', 'error');
                 })
         }
     });

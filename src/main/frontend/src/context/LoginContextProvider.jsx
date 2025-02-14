@@ -117,7 +117,7 @@ const LoginContextProvider = ({children}) => {
             }
         } catch (error) {
             // 로그인 실패
-             Swal.alert(`로그인 실패`, "아이디 혹은 비밀번호가 맞지 않습니다.");
+             Swal.alert(`로그인 실패`, "아이디 혹은 비밀번호가 맞지 않습니다.", "error");
         }
 
     }
@@ -135,7 +135,7 @@ const LoginContextProvider = ({children}) => {
         }
 
         // force=false인 경우 일반 로그아웃(확인 창O)
-        Swal.confirm("로그아웃하시겠습니까?", "로그아웃이 진행됩니다.", "warning", (result) => {
+        Swal.confirm("로그아웃하시겠습니까?", "로그아웃이 진행됩니다.", "question", (result) => {
             if( result.isConfirmed ) {
                 // 로그아웃 세팅
                 logoutSetting();

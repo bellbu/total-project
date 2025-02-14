@@ -33,7 +33,7 @@ public class AdminController { // JWT 토큰 생성 RestController
      */
     @Secured({"ROLE_ADMIN", "ROLE_USER"}) // 해당 메서드에 접근할 수 있는 권한 설정
     @GetMapping("/info")
-    public ResponseEntity<?> getAdmins(@AuthenticationPrincipal CustomAdmin customAdmin) {
+    public ResponseEntity<?> getAdmins(@AuthenticationPrincipal CustomAdmin customAdmin) { // @AuthenticationPrincipal: 로그인 인증 시 SecurityContextHolder에서 저장된 CustomAdmin 객체를 가져옴
         if (customAdmin == null) {
             throw new IllegalStateException("CustomAdmin is null");
         }

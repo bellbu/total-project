@@ -70,7 +70,7 @@ const MainTopBar = ({ setTab }: Props) => {
     const handleListClick = () => {
         // authorities가 null이 아니고 isUser가 true이며 isAdmin이 false인 경우
         if (authorities && authorities.isUser && !authorities.isAdmin) {
-            Swal.alert("관리자만 접근할 수 있습니다.");
+            Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
             return;
         }
         setTab(Tab.LIST);

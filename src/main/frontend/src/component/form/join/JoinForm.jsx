@@ -34,19 +34,19 @@ const JoinForm = ({ join }) => {
       // 이메일 정규식 검사
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-            Swal.alert("올바른 이메일 형식을 입력해주세요.");
+            Swal.alert("올바른 이메일 형식을 입력해주세요.", "", "warning");
             return;
       }
 
       // 빈값 유효성 검사
       if(!email || !name || !password) {
-        Swal.alert('모든 필드를 입력해 주세요.')
+        Swal.alert('모든 필드를 입력해 주세요.', '', 'warning')
         return;
       }
 
       // 권한 선택 검사
       if (!selectedRole) {
-          Swal.alert("권한을 선택해주세요.");
+          Swal.alert("권한을 선택해주세요.", "", "warning");
           return;
       }
 

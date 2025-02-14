@@ -84,14 +84,14 @@ const UserNameEditModalContent = ({userId, currentName, refresh, onClose}: Props
 
     UserApi.putUser(userId, newName)
         .then(() => {
-            Swal.alert('이름이 성공적으로 수정되었습니다!');
+            Swal.alert('이름이 성공적으로 수정되었습니다!', '', 'success');
             onClose()
             refresh()
         })
         .catch((error) => {
             // 백엔드에서 받은 에러 메시지를 화면에 표시
             const errorMessage = error?.data || '오류가 발생했습니다.';
-            Swal.alert(errorMessage);
+            Swal.alert(errorMessage, '', 'error');
         });
   }
 

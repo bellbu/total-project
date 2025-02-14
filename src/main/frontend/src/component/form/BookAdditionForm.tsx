@@ -31,19 +31,19 @@ const BookAdditionForm = () => {
   const handleClick = () => {
 
     if (!bookTitle.trim()) { // trim()을 사용하여 공백 제거
-        Swal.alert('책 이름을 입력해 주세요.');
+        Swal.alert('책 이름을 입력해 주세요.', '', 'warning');
         return;
     }
 
     BookApi.postBook(bookTitle)
       .then(data => {
-        Swal.alert('책 등록에 성공했습니다!');
+        Swal.alert('책 등록에 성공했습니다!', '', 'success');
         setBookTitle('');
       })
       .catch(error => {
         // 백엔드에서 받은 에러 메시지를 화면에 표시
         const errorMessage = error?.data || error.message || '오류가 발생했습니다.';
-        Swal.alert(errorMessage);
+        Swal.alert(errorMessage, '', 'error');
       })
   }
 

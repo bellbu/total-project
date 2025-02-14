@@ -19,7 +19,7 @@ const Join = () => {
         response = await auth.join(form);  // 회원가입 요청(POST 요청)
     } catch (error) {
         const errorMessage = error.response.data;
-        Swal.alert(errorMessage);
+        Swal.alert(errorMessage, '', 'error');
         return; // 오류 발생 시 함수 종료
     }
 
@@ -27,10 +27,10 @@ const Join = () => {
     const status = response.status; // HTTP 상태 코드 추출
 
     if(status === 200) {
-        Swal.alert(`회원가입 성공!`);
+        Swal.alert(`회원가입 성공!`, '', 'success');
         navigate("/login"); // 회원가입 성공 시 로그인 페이지 이동
     } else {
-        Swal.alert(`회원가입에 실패하였습니다.`)
+        Swal.alert(`회원가입에 실패하였습니다.`, '', 'error')
     }
 
   }

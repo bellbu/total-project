@@ -39,15 +39,15 @@ export const request = async <T>(
     console.log("error : ", error);
 
     if (error.code && error.code === 'ERR_NETWORK') {
-      Swal.alert('서버에 연결이 불가능하거나, 네트워크 오류입니다.')
+      Swal.alert('서버에 연결이 불가능하거나, 네트워크 오류입니다.', '', 'error')
     }
 
     if (error.response.status === 404) {
-      Swal.alert(`해당 URI에 대한 서버의 응답이 없습니다. : ${method} /${uri}`)
+      Swal.alert(`해당 URI에 대한 서버의 응답이 없습니다. : ${method} /${uri}`, '', 'error')
     }
 
     if (error.response.status === 500) {
-      Swal.alert('서버 내부 오류입니다.')
+      Swal.alert('서버 내부 오류입니다.', '', 'error')
     }
 
     throw error.response || { message: '알 수 없는 오류가 발생했습니다.' };
