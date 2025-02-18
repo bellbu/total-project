@@ -6,7 +6,7 @@ const MySwal = withReactContent(Swal)
 // 커스텀 스타일 설정
 const customStyle = {
   title: {
-    fontSize: '24px',    // 제목 폰트 크기
+    fontSize: '23px',    // 제목 폰트 크기
     fontWeight: '600'    // 제목 폰트 굵기
   },
   text: {

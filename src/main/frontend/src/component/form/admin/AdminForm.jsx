@@ -43,7 +43,7 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
           return;
       }
 
-      updateAdmin({ email, name, password, emailVerified, authorities: selectedRole });
+      updateAdmin({ email: adminInfo.email, name, password, emailVerified, authorities: selectedRole });
   }
 
   return (

@@ -74,44 +74,25 @@ public class JwtTokenProvider {
             // 인증된 사용자 이메일
             String email = parsedToken.getBody().get("email", String.class);
 
-            // 인증된 사용자 권한(다중 권한인 경우)
-            List<String> roles = parsedToken.getBody().get("authorities", List.class);
-            List<GrantedAuthority> authorities = roles.stream() // 스프링 시큐리티의 권한 관리를 위해 GrantedAuthority 인터페이스 타입 필요
-                                                    .map(SimpleGrantedAuthority::new) // = map(role -> new SimpleGrantedAuthority(role)), SimpleGrantedAuthority: GrantedAuthority의 구현체
-                                                    .collect(Collectors.toList());
-            log.info("authorities : {}", authorities);
-
             // 토큰에 필요한 정보가 없는 경우 처리
-            if (email == null || email.isEmpty() || roles == null || roles.isEmpty())
+            if (email == null || email.isEmpty()) {
                 return null;
+            }
 
             // Admin 객체 조회 및 유효성 검증
             Admin admin = adminRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException(email + " -> DB에서 관리자를 찾을 수 없습니다."));
-
-            // 최신 권한 정보 가져오기
-            List<Authority> adminAuthorities = admin.getAuthorities(); // DB에서 가져온 권한 정보
-
-            // CustomAdmin 객체 생성: 조회한 Admin 데이터를 스프링 시큐리티의 인증 객체로 변환
-            CustomAdmin userDetails = new CustomAdmin(admin);
-            log.info("providerUserDetails : " + userDetails);
-
+            
             // 권한 리스트 생성
-            List<GrantedAuthority> author = adminAuthorities.stream()
+            List<GrantedAuthority> authorities = admin.getAuthorities().stream()
                                                     .map(Authority::name) // 열거형(enum) 데이터를 문자열(String)로 변환
                                                     .map(SimpleGrantedAuthority::new) // GrantedAuthority로 변환
                                                     .collect(Collectors.toList());
 
-            return new UsernamePasswordAuthenticationToken(userDetails, null, author); // 인증된 사용자(userDetails)와 해당 사용자의 권한들(authorities)을 스프링 시큐리티의 인증 객체로 생성하여 리턴
+            return new UsernamePasswordAuthenticationToken(new CustomAdmin(admin), null, authorities); // 인증된 사용자(userDetails)와 해당 사용자의 권한들(authorities)을 스프링 시큐리티의 인증 객체로 생성하여 리턴
 
-        } catch (ExpiredJwtException exception) {
-            log.warn("Request to parse expired JWT : {} failed : {}", jwt, exception.getMessage());
-        } catch (UnsupportedJwtException exception) {
-            log.warn("Request to parse unsupported JWT : {} failed : {}", jwt, exception.getMessage());
-        } catch (MalformedJwtException exception) {
-            log.warn("Request to parse invalid JWT : {} failed : {}", jwt, exception.getMessage());
-        } catch (IllegalArgumentException exception) {
-            log.warn("Request to parse empty or null JWT : {} failed : {}", jwt, exception.getMessage());
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException exception) {
+            log.warn("JWT 처리 실패: {} - {}", jwt, exception.getMessage());
         }
 
         return null;
