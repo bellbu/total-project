@@ -252,11 +252,6 @@ select:-moz-focusring {
   color: white;
 }
 
-/* 선택된 아이템 스타일 제거 */
-.same-as-selected {
-  /* 기존 스타일 제거 */
-}
-
 .select-selected:hover {
   border: 2px solid #748ffc;
   box-shadow: 0 0 10px rgba(116, 143, 252, 0.2);

@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 
 /*
-* [GET]     /admin/info - 회원정보 조회   (ROLE_USER)
+* [GET]     /admin/info - 회원정보 조회   (ROLE_ADMIN, ROLE_USER)
 * [POST]    /admin      - 회원가입        ALL
-* [PUT]     /admin      - 회원정보 수정   (ROLE_USER)
-* [DELETE]  /admin      - 회원탈퇴       (ROLE_ADMIN)
+* [PUT]     /admin      - 회원정보 수정   (ROLE_ADMIN, ROLE_USER)
+* [DELETE]  /admin      - 회원탈퇴       (ROLE_ADMIN, ROLE_USER)
 * */
 @Slf4j // log 객체를 자동 생성
 @RequiredArgsConstructor // 필드 주입을 생성자 주입으로 자동 설정
@@ -73,15 +73,19 @@ public class AdminController { // JWT 토큰 생성 RestController
     /**
      * 관리자 정보 수정
      */
-    @Secured("ROLE_ADMIN") // ADMIN 권한 설정
+    @Secured({"ROLE_ADMIN", "ROLE_USER"}) // ADMIN 권한 설정
     @PutMapping("")
     public ResponseEntity<?> updateAdmin(@RequestBody AdminUpdateRequest request) throws Exception {
-        int result = adminService.updateAdmin(request);
+        try {
+            int result = adminService.updateAdmin(request);
 
-        if( result > 0 ) {
-            return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
+            if( result > 0 ) {
+                return ResponseEntity.ok("SUCCESS");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FAIL");
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -89,7 +93,7 @@ public class AdminController { // JWT 토큰 생성 RestController
     /**
      * 관리자 탈퇴
      */
-    @Secured("ROLE_ADMIN") // Admin 권한 설정
+    @Secured({"ROLE_ADMIN", "ROLE_USER"}) // Admin 권한 설정
     @DeleteMapping("/{email}")
     public ResponseEntity<?> destroy(@PathVariable("email") String email) throws Exception {
 

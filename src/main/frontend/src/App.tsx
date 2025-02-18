@@ -5,6 +5,7 @@ import LoginContextProvider from './context/LoginContextProvider';
 import { LoginContext } from './context/LoginContextProvider'
 import Login from './page/login/Login';
 import Join from './page/join/Join';
+import * as Swal from './api/common/alert';
 
 /**
  * PublicRoute와 ProtectedRoute라는 별도의 컴포넌트를 정의해 접근 제어 구현
@@ -20,12 +21,23 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => { // { children
   return !isLogin ? children : <Navigate to="/main" replace />; // isLogin이 true인 경우: "/main"으로 리다이렉트, isLogin이 false인 경우: 자식 컴포넌트를 렌더링
 };
 
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { isLogin, isLoading } = useContext(LoginContext);
+const ProtectedRoute = ({ children, adminOnly }: { children: JSX.Element, adminOnly?: boolean }) => {
+  const { isLogin, isLoading, authorities } = useContext(LoginContext);
   
   if (isLoading) return null;
-  
-  return isLogin ? children : <Navigate to="/login" replace />; // isLogin이 true인 경우: 자식 컴포넌트를 렌더링, isLogin이 false인 경우: "/login"으로 리다이렉트
+
+  if (!isLogin) return <Navigate to="/login" replace />;
+
+  // 관리자 전용 페이지 접근 제어
+  if (adminOnly && (!authorities || !authorities.isAdmin)) {
+    Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
+    return <Navigate to="/main" replace />;
+  }
+
+  return children;
+
+  // return isLogin ? children : <Navigate to="/login" replace />; // isLogin이 true인 경우: 자식 컴포넌트를 렌더링, isLogin이 false인 경우: "/login"으로 리다이렉트
+
 };
 
 /**
@@ -85,6 +97,23 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/user"
+        element={
+          <ProtectedRoute adminOnly={true}>
+            <MainPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="/admin"
+        element={
+          <ProtectedRoute>
+            <MainPage />
+          </ProtectedRoute>
+        }
+      />
+
 
     </Routes>
   );

@@ -73,13 +73,10 @@ const LoginContextProvider = ({children}) => {
         api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
 
         // 사용자 정보 요청
-        let response
-        let data
-
         try {
-            response = await auth.info(); // auth.info(): api 호출하여 관리자 정보 조회, api 요청 헤더에 JWT 정보 담겨있음
-            data = response.data;
-            
+            const response = await auth.info(); // auth.info(): api 호출하여 관리자 정보 조회, api 요청 헤더에 JWT 정보 담겨있음
+            const data = response.data;
+
             if(data === 'UNAUTHRIZED' || response.status === 401) {  // 요청 실패 시 로그 아웃 처리
                 logoutSetting();
             } else { // 요청 성공 시 로그인 설정
@@ -167,8 +164,7 @@ const LoginContextProvider = ({children}) => {
         setLogin(true);
 
         // 유저 정보 세팅 (name 포함)
-        const updatedAdminInfo = {id, email, name, authorities};
-        setAdminInfo(updatedAdminInfo);
+        setAdminInfo({ id, email, name, authorities });
 
         // 권한 정보 세팅
         const updatedAuthorities = {isUser : false, isAdmin : false};
@@ -210,7 +206,7 @@ const LoginContextProvider = ({children}) => {
     return (
         // LoginContext.Provider를 사용해 데이터와 함수를 Context에 전달
         // LoginContextProvider의 자식 컴포넌트들이 Context 값을 사용할 수 있음
-        <LoginContext.Provider value={{ isLogin, adminInfo, authorities, login, loginCheck, logout, isLoading }}>
+        <LoginContext.Provider value={{ isLogin, adminInfo, authorities, login, loginCheck, logout, isLoading, setAdminInfo }}>
             {children}  
         </LoginContext.Provider>
     )

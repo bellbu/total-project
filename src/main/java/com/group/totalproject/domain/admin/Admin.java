@@ -59,9 +59,24 @@ public class Admin {
         this.emailVerified = emailVerified != null ? emailVerified : false;
     }
 
-    public void updateAdmin(String name, Boolean emailVerified) {
+    public void updateAdmin(String name, String password, List<Authority> authorities, Boolean emailVerified) {
         this.name = name;
+        this.password = password;
+        this.authorities = authorities;
         this.emailVerified = emailVerified;
     }
 
+    @Override
+    public String toString() {
+        return "Admin{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", password='" + password + '\'' +
+                ", authorities=" + authorities +
+                ", emailVerified=" + emailVerified +
+                ", regDate=" + regDate +
+                ", visitDate=" + visitDate +
+                '}';
+    }
 }

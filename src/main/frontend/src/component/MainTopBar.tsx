@@ -28,19 +28,41 @@ const RightMenu = styled.div`
   align-items: center;
 `;
 
-const TextButton = styled.button`
+const TextButton = styled.button<{ isActive?: boolean }>`
   border: 0;
   outline: 0;
-  background-color: rgba(0, 0, 0, 0);
-  color: white;
-  cursor: pointer;
-  font-size: 18px;
+  background-color: transparent;
+  color: ${({ isActive }) => (isActive ? "#FFD700" : "white")}; /* 선택된 탭은 금색 */
+  font-size: 20px;
   font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  padding-bottom: 4px;
+  margin-right: 20px; /* 버튼 간격 추가 */
 
   &:hover {
-    color: whitesmoke;
+    color: #f0e68c;
+  }
+
+  ${({ isActive }) =>
+    isActive &&
+    `
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 3px;
+      background-color: #FFD700; /* 선택된 탭 아래 금색 밑줄 */
+    }
+  `}
+
+  &:last-child {
+    margin-right: 0; /* 마지막 버튼에는 마진을 적용하지 않음 */
   }
 `;
+
 
 const StyledLink = styled(Link)`
   text-decoration: none;
@@ -56,9 +78,10 @@ const StyledLink = styled(Link)`
 
 interface Props {
   setTab: (_: Tab) => void;
+  tab: Tab; // 현재 선택된 탭 추가
 }
 
-const MainTopBar = ({ setTab }: Props) => {
+const MainTopBar = ({ setTab, tab }: Props) => {
     const { isLogin, adminInfo, authorities, logout } = useContext(LoginContext);
     const navigate = useNavigate();
 
@@ -69,25 +92,35 @@ const MainTopBar = ({ setTab }: Props) => {
     // 회원 목록 클릭 핸들러 추가
     const handleListClick = () => {
         // authorities가 null이 아니고 isUser가 true이며 isAdmin이 false인 경우
-        if (authorities && authorities.isUser && !authorities.isAdmin) {
+        if (!authorities?.isAdmin) {
             Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
             return;
         }
-        setTab(Tab.LIST);
+        setTab(Tab.USER);
     }
 
     return (
         <Container>
             {/* 왼쪽 메뉴 */}
             <LeftMenu>
+                <TextButton onClick={() => setTab(Tab.FORM)} isActive={tab === Tab.FORM}>홈</TextButton>
+                <TextButton onClick={handleListClick} isActive={tab === Tab.USER}>회원 목록</TextButton>
+                {/*
                 <TextButton onClick={() => setTab(Tab.FORM)}>홈</TextButton>
                 <TextButton onClick={handleListClick} style={{ marginLeft: '20px' }}>회원 목록</TextButton>
+                */}
             </LeftMenu>
 
             {/* 오른쪽 메뉴 */}
             <RightMenu>
-                <StyledLink to="/admin">{(adminInfo?.name || '사용자') + ' 님'}</StyledLink>
+                <TextButton onClick={() => setTab(Tab.ADMIN)} isActive={tab === Tab.ADMIN}>
+                    {(adminInfo?.name || '사용자') + ' 님'}
+                </TextButton>
+                <TextButton onClick={() => logout()}>로그아웃</TextButton>
+                {/*
+                <TextButton onClick={handleAdminClick}>{(adminInfo?.name || '사용자') + ' 님'}</TextButton>
                 <TextButton onClick={() => logout()} style={{ marginLeft: '20px' }}>로그아웃</TextButton>
+                */}
             </RightMenu>
         </Container>
     );

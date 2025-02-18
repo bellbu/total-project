@@ -50,7 +50,7 @@ const JoinForm = ({ join }) => {
           return;
       }
 
-      join({ email, name, password, emailVerified, role: selectedRole });
+      join({ email, name, password, emailVerified, authorities: selectedRole });
   }
 
   return (

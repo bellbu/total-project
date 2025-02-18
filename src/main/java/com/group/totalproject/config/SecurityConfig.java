@@ -54,8 +54,9 @@ public class SecurityConfig {
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/main").authenticated()
                 .requestMatchers(HttpMethod.POST, "/user").hasAnyRole("USER", "ADMIN") // 회원 등록은 ADMIN(관리자), USER(부관리자) 모두 가능
-                .requestMatchers("/user/**").hasRole("ADMIN") // ADMIN(관리자)는 회원 모든 요청 가능, USER(부관리자)는 회원 등록만 가능
-                .requestMatchers("/admin/**").permitAll()
+                .requestMatchers("/user/**").hasRole("ADMIN") // 회원 조회/수정/삭제는 ADMIN(관리자)만 허용
+                .requestMatchers(HttpMethod.POST, "/admin").permitAll() // 관리자 가입은 모두 허용
+                .requestMatchers("/admin/**").hasAnyRole("USER", "ADMIN") // 관리자 조회/수정/삭제는 모든 관리자 가능
                 .anyRequest().authenticated()
         );
 
