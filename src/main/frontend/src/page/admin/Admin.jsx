@@ -22,7 +22,7 @@ const ContentsContainer = styled.div`
   overflow-y: auto;
 `;
 
-const Admin = ({ setTab }) => {
+const Admin = () => {
     const { adminInfo, setAdminInfo, loginCheck, logout } = useContext(LoginContext);
     const navigate = useNavigate();
 

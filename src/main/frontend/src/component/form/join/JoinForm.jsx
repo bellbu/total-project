@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../login/LoginForm.css';
 import * as Swal from '../../../api/common/alert';
@@ -6,11 +6,11 @@ import * as Swal from '../../../api/common/alert';
 const JoinForm = ({ join }) => {
 
   const navigate = useNavigate();
-  const [isRoleOpen, setIsRoleOpen] = React.useState(false);
-  const [selectedRole, setSelectedRole] = React.useState('ROLE_ADMIN');
-  const roleRef = React.useRef(null);
+  const [isRoleOpen, setIsRoleOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('ROLE_ADMIN');
+  const roleRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (roleRef.current && !roleRef.current.contains(event.target)) {
         setIsRoleOpen(false);

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AdminForm.css';
 import * as Swal from '../../../api/common/alert';
@@ -6,19 +6,19 @@ import * as Swal from '../../../api/common/alert';
 const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
 
   const navigate = useNavigate();
-  const [isRoleOpen, setIsRoleOpen] = React.useState(false);
-  const [selectedRole, setSelectedRole] = React.useState(adminInfo?.authorities.includes("ROLE_ADMIN") ? 'ROLE_ADMIN' : 'ROLE_USER');
-  const roleRef = React.useRef(null);
+  const [isRoleOpen, setIsRoleOpen] = useState(false); // isRoleOpen: 권한 선택 드롭다운이 열려 있는지 여부 (true: 열림/false: 닫힘)
+  const [selectedRole, setSelectedRole] = useState(adminInfo?.authorities.includes("ROLE_ADMIN") ? 'ROLE_ADMIN' : 'ROLE_USER');
+  const roleRef = useRef(null); // 드롭다운 외부 클릭 시 닫기 위한 ref
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      if (roleRef.current && !roleRef.current.contains(event.target)) {
-        setIsRoleOpen(false);
+      if (roleRef.current && !roleRef.current.contains(event.target)) { // roleRef.current: 요소(드롭다운 영역)
+        setIsRoleOpen(false); // 드롭다운 영역 바깥을 클릭하면 드롭다운을 닫음
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside); // 마우스 클릭 시 handleClickOutside 함수 호출 이벤트 추가
+    return () => document.removeEventListener('mousedown', handleClickOutside); // 언마운트될 때(unmount) 이벤트 제거
   }, []);
 
   const onUpdate = (e) => {
@@ -98,7 +98,7 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
               {selectedRole === 'ROLE_ADMIN' ? '관리자' : '부관리자'}
             </div>
 
-            {isRoleOpen && (
+            {isRoleOpen && (  // isRoleOpen이 true인 경우 오른쪽 코드 렌더링 false인 경우 렌더링 되지 않음
               <div className="select-items">
                 <div
                   className={selectedRole === 'ROLE_ADMIN' ? 'same-as-selected' : ''}

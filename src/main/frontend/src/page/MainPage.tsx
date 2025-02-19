@@ -21,23 +21,24 @@ const ContentsContainer = styled.div`
   overflow-y: auto;
 `;
 
+// Tab 타입
 export enum Tab {
-   FORM = "main",
-   USER = "user",
-   ADMIN = "admin",
+   FORM = "main", // Tab.FORM = "main"
+   USER = "user", // Tab.USER = "user"
+   ADMIN = "admin", // Tab.ADMIN = "admin"
 }
 
 const MainPage = () => {
 
-  const location = useLocation();
+  const location = useLocation(); // 현재 URL 정보를 가져옴
   const navigate = useNavigate();
 
-  // URL에서 현재 탭 가져오기 (기본값: FORM)
-  const currentTab = location.pathname.replace("/", "") as Tab;
-  const tab = Object.values(Tab).includes(currentTab) ? currentTab : Tab.FORM;
+  // URL에서 현재 탭 가져오기
+  const currentTab = location.pathname.replace("/", "") as Tab; // 현재 URL에서 "/" 제거 후 Tab 타입으로 변환 currentTab = main/user/admin
+  const tab = Object.values(Tab).includes(currentTab) ? currentTab : Tab.FORM; // currentTab이 Tab에 속하면 currentTab이 유지, 속하지 않으면 Tab.FORM(메인) 유지
 
   // 탭 변경 시 URL도 변경
-  const setTab = (newTab: Tab) => {
+  const setTab = (newTab: Tab) => {  // (newTab: Tab) - newTab의 타입을 Tab으로 지정
     navigate(`/${newTab}`);
   };
 
@@ -45,9 +46,9 @@ const MainPage = () => {
     <Container>
       <MainTopBar setTab={setTab} tab={tab}/>
       <ContentsContainer>
-        {tab === Tab.FORM && <FormPage />}
+        {tab === Tab.FORM && <FormPage />} {/* tab === Tab.FORM가 true인 경우 => <FormPage /> 렌더링 */}
         {tab === Tab.USER && <UserListPage />}
-        {tab === Tab.ADMIN && <Admin  setTab={setTab} />}
+        {tab === Tab.ADMIN && <Admin />}
       </ContentsContainer>
     </Container>
   );

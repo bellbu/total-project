@@ -76,9 +76,9 @@ const StyledLink = styled(Link)`
   }
 `;
 
-interface Props {
-  setTab: (_: Tab) => void;
-  tab: Tab; // 현재 선택된 탭 추가
+interface Props { // 부모 컴퍼넌트에서 넘어온 setTab과 tab의 타입을 Props 인터페이스로 정의
+  setTab: (newTab: Tab) => void; // Tab 타입의 매개변수("newTab")를 받아서 void를 반환하는 함수.
+  tab: Tab; // Tab 타입
 }
 
 const MainTopBar = ({ setTab, tab }: Props) => {
@@ -105,10 +105,6 @@ const MainTopBar = ({ setTab, tab }: Props) => {
             <LeftMenu>
                 <TextButton onClick={() => setTab(Tab.FORM)} isActive={tab === Tab.FORM}>홈</TextButton>
                 <TextButton onClick={handleListClick} isActive={tab === Tab.USER}>회원 목록</TextButton>
-                {/*
-                <TextButton onClick={() => setTab(Tab.FORM)}>홈</TextButton>
-                <TextButton onClick={handleListClick} style={{ marginLeft: '20px' }}>회원 목록</TextButton>
-                */}
             </LeftMenu>
 
             {/* 오른쪽 메뉴 */}
@@ -117,10 +113,6 @@ const MainTopBar = ({ setTab, tab }: Props) => {
                     {(adminInfo?.name || '사용자') + ' 님'}
                 </TextButton>
                 <TextButton onClick={() => logout()}>로그아웃</TextButton>
-                {/*
-                <TextButton onClick={handleAdminClick}>{(adminInfo?.name || '사용자') + ' 님'}</TextButton>
-                <TextButton onClick={() => logout()} style={{ marginLeft: '20px' }}>로그아웃</TextButton>
-                */}
             </RightMenu>
         </Container>
     );

@@ -39,7 +39,7 @@ const LoginContextProvider = ({children}) => {
     // 이메일 저장 여부
     const [rememberEmail, setRememberEmail] = useState();
 
-    // 로그인 체크 로딩 상태
+    // 로그인 체크 로딩 상태 (true: 로딩 중 / false: 로딩 완료)
     const [isLoading, setIsLoading] = useState(true);
     /*-------------------------------------------------------------- */
 

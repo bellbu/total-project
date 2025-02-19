@@ -82,7 +82,7 @@ public class JwtTokenProvider {
             // Admin 객체 조회 및 유효성 검증
             Admin admin = adminRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException(email + " -> DB에서 관리자를 찾을 수 없습니다."));
-            
+
             // 권한 리스트 생성
             List<GrantedAuthority> authorities = admin.getAuthorities().stream()
                                                     .map(Authority::name) // 열거형(enum) 데이터를 문자열(String)로 변환
