@@ -50,7 +50,7 @@ public class SecurityConfig {
         // 인가 설정
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .requestMatchers("/").permitAll() // 루트 경로("/") 모든 사용자에게 허용
+                .requestMatchers("/", "/error", "/index.html", "/static/**", "/favicon.ico", "/logo192.png", "/manifest.json").permitAll() // 정적 리소스 직접 허용 추가
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/main").authenticated()
                 .requestMatchers(HttpMethod.POST, "/user").hasAnyRole("USER", "ADMIN") // 회원 등록은 ADMIN(관리자), USER(부관리자) 모두 가능
