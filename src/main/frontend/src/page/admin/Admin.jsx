@@ -5,7 +5,6 @@ import AdminForm from '../../component/form/admin/AdminForm'
 import { LoginContext } from '../../context/LoginContextProvider';
 import { useNavigate } from 'react-router-dom'
 import * as Swal from '../../api/common/alert';
-import MainTopBar from "../../component/MainTopBar";
 
 const Container = styled.div`
   width: 100%;
@@ -29,7 +28,6 @@ const Admin = () => {
     const updateAdmin = async (form) => {
         try {
             const response = await auth.update(form);
-            const data = response.data;
             const status = response.status;
 
             if (status === 200) {
@@ -38,7 +36,7 @@ const Admin = () => {
 
                 Swal.alert("관리자 정보 수정 성공", "", "success", async () => {
                                                                                 await loginCheck();
-                                                                                navigate('/main');
+                                                                                navigate('/mainPage');
                                                                             });
             } else {
                 Swal.alert("관리자 정보 수정에 실패하였습니다.", "", "error");
@@ -56,7 +54,6 @@ const Admin = () => {
         if (result.isConfirmed) {
             try {
                 const response = await auth.remove(email);
-                const data = response.data;
                 const status = response.status;
 
                 if (status === 200 )  {

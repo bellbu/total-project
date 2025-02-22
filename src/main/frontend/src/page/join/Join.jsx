@@ -1,5 +1,4 @@
 import React from 'react'
-import LoginContextConsumer from '../../context/LoginContextConsumer'
 import JoinForm from '../../component/form/join/JoinForm'
 import * as auth from '../../api/login/auth'
 import { useNavigate } from 'react-router-dom'
@@ -13,7 +12,6 @@ const Join = () => {
   const join = async (form) => {  // form: 사용자 입력 데이터 객체  ex) { email, name, password }
 
     let response; // 회원가입 API 응답 객체
-    let data;     // 회원가입 API 응답 데이터: SUCCESS or FAIL
 
     try {
         response = await auth.join(form);  // 회원가입 요청(POST 요청)
@@ -23,12 +21,11 @@ const Join = () => {
         return; // 오류 발생 시 함수 종료
     }
 
-    data = response.data; // 응답 데이터 추출
     const status = response.status; // HTTP 상태 코드 추출
 
     if(status === 200) {
         Swal.alert(`회원가입 성공!`, '', 'success');
-        navigate("/login"); // 회원가입 성공 시 로그인 페이지 이동
+        navigate("/loginPage"); // 회원가입 성공 시 로그인 페이지 이동
     } else {
         Swal.alert(`회원가입에 실패하였습니다.`, '', 'error')
     }

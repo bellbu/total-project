@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 import MainPage from "./page/MainPage";
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginContextProvider from './context/LoginContextProvider';
 import { LoginContext } from './context/LoginContextProvider'
 import Login from './page/login/Login';
@@ -18,7 +18,7 @@ const PublicRoute = ({ children }: { children: JSX.Element }) => { // { children
   
   if (isLoading) return null; // 로그인 체크 로딩 중인 경우 아무것도 렌더링하지 않음
   
-  return !isLogin ? children : <Navigate to="/main" replace />; // isLogin이 true인 경우: "/main"으로 리다이렉트, isLogin이 false인 경우: 자식 컴포넌트를 렌더링
+  return !isLogin ? children : <Navigate to="/mainPage" replace />; // isLogin이 true인 경우: "/main"으로 리다이렉트, isLogin이 false인 경우: 자식 컴포넌트를 렌더링
 };
 
 const ProtectedRoute = ({ children, adminOnly }: { children: JSX.Element, adminOnly?: boolean }) => {
@@ -26,17 +26,17 @@ const ProtectedRoute = ({ children, adminOnly }: { children: JSX.Element, adminO
   
   if (isLoading) return null;
 
-  if (!isLogin) return <Navigate to="/login" replace />;
+  if (!isLogin) return <Navigate to="/loginPage" replace />;
 
   // 관리자 전용 페이지 접근 제어
   if (adminOnly && (!authorities || !authorities.isAdmin)) {
     Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
-    return <Navigate to="/main" replace />;
+    return <Navigate to="/mainPage" replace />;
   }
 
   return children;
 
-  // return isLogin ? children : <Navigate to="/login" replace />; // isLogin이 true인 경우: 자식 컴포넌트를 렌더링, isLogin이 false인 경우: "/login"으로 리다이렉트
+  // return isLogin ? children : <Navigate to="/loginPage" replace />; // isLogin이 true인 경우: 자식 컴포넌트를 렌더링, isLogin이 false인 경우: "/login"으로 리다이렉트
 
 };
 
@@ -74,23 +74,23 @@ function AppRoutes() {
         } 
       />
       
-      <Route path="/login" 
+      <Route path="/loginPage"
         element={
           <PublicRoute>
             <Login />
           </PublicRoute>
-        } 
+        }
       />
-      
-      <Route path="/join" 
+
+      <Route path="/joinPage"
         element={
           <PublicRoute>
             <Join />
           </PublicRoute>
-        } 
+        }
       />
 
-      <Route path="/main"
+      <Route path="/mainPage"
         element={
           <ProtectedRoute>
             <MainPage />
@@ -98,7 +98,7 @@ function AppRoutes() {
         }
       />
 
-      <Route path="/user"
+      <Route path="/userPage"
         element={
           <ProtectedRoute adminOnly={true}>
             <MainPage />
@@ -106,7 +106,7 @@ function AppRoutes() {
         }
       />
 
-      <Route path="/admin"
+      <Route path="/adminPage"
         element={
           <ProtectedRoute>
             <MainPage />

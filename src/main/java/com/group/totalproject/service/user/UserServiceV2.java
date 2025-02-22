@@ -101,7 +101,7 @@ public class UserServiceV2 {
 
         // 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
         if (userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId())) {
-            throw new IllegalStateException("대출 중인 책이 있어 삭제할 수 없습니다.");
+            throw new IllegalArgumentException("대출 중인 회원은 삭제할 수 없습니다. \n반납 후 다시 시도해주세요.");
         }
 
         userRepository.delete(user);

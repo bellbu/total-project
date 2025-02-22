@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Colors } from "../resource/Colors";
 import { Tab } from "../page/MainPage";
 import { LoginContext } from "../context/LoginContextProvider";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import * as Swal from '../../src/api/common/alert';
 
 const Container = styled.div`
@@ -63,19 +63,6 @@ const TextButton = styled.button<{ isActive?: boolean }>`
   }
 `;
 
-
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  color: white;
-  font-size: 18px;
-  font-weight: 700;
-  margin-left: 20px;
-
-  &:hover {
-    color: whitesmoke;
-  }
-`;
-
 interface Props { // 부모 컴퍼넌트에서 넘어온 setTab과 tab의 타입을 Props 인터페이스로 정의
   setTab: (newTab: Tab) => void; // Tab 타입의 매개변수("newTab")를 받아서 void를 반환하는 함수.
   tab: Tab; // Tab 타입
@@ -86,7 +73,7 @@ const MainTopBar = ({ setTab, tab }: Props) => {
     const navigate = useNavigate();
 
     if (!isLogin) {
-        navigate("/login");
+        navigate("/loginPage");
     }
 
     // 회원 목록 클릭 핸들러 추가

@@ -93,8 +93,8 @@ const JoinForm = ({ join }) => {
 
             {/* 이메일 인증여부 추후에 추가 */}
 
-            <div className="custom-select" ref={roleRef}>
-                <label htmlFor="role">권한</label>
+            <div className="custom-select" ref={roleRef} aria-labelledby="role-label">
+                <label id="role-label">권한</label>
 
                 <div
                     className={`select-selected ${isRoleOpen ? 'select-arrow-active' : ''}`}
@@ -138,7 +138,7 @@ const JoinForm = ({ join }) => {
             <button 
               type='button' 
               className='btn btn--form btn-cancel' 
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/loginPage")}
             >
               취소
             </button>

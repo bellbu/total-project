@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import styled from "styled-components";
 import MainTopBar from "../component/MainTopBar";
 import FormPage from "./form/FormPage";
@@ -23,9 +23,9 @@ const ContentsContainer = styled.div`
 
 // Tab 타입
 export enum Tab {
-   FORM = "main", // Tab.FORM = "main"
-   USER = "user", // Tab.USER = "user"
-   ADMIN = "admin", // Tab.ADMIN = "admin"
+   FORM = "mainPage", // Tab.FORM = "main"
+   USER = "userPage", // Tab.USER = "user"
+   ADMIN = "adminPage", // Tab.ADMIN = "admin"
 }
 
 const MainPage = () => {

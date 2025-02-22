@@ -50,7 +50,7 @@ const LoginForm = () => {
                 </div>
                 <button type='submit' className='btn btn--form btn-login'>로그인</button>
                 <hr className='login-hr'/>
-                <button className="btn btn--form btn-join" onClick={() => navigate('/join')}>가입</button>
+                <button type="button" className="btn btn--form btn-join" onClick={() => navigate('/joinPage')}>가입</button>
             </form>
             
         </div>

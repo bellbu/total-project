@@ -14,11 +14,17 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 // SpringSecurity 5.4 이하
 // public class SecurityConfig extends WebSecurityConfigurerAdapter { }
@@ -31,6 +37,22 @@ public class SecurityConfig {
 
     private final CustomAdminDetailService customAdminDetailService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    // 정적 상수로 허용할 경로들을 정의
+    private static final String[] PUBLIC_URLS = {
+            "/",
+            "/error",
+            "/index.html",
+            "/static/**",
+            "/favicon.ico",
+            "/logo192.png",
+            "/manifest.json",
+            "/loginPage",
+            "/joinPage",
+            "/mainPage",
+            "/userPage",
+            "/adminPage"
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -50,9 +72,7 @@ public class SecurityConfig {
         // 인가 설정
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                .requestMatchers("/", "/error", "/index.html", "/static/**", "/favicon.ico", "/logo192.png", "/manifest.json").permitAll() // 정적 리소스 직접 허용 추가
-                .requestMatchers("/login").permitAll()
-                .requestMatchers("/main").authenticated()
+                .requestMatchers(PUBLIC_URLS).permitAll()
                 .requestMatchers(HttpMethod.POST, "/user").hasAnyRole("USER", "ADMIN") // 회원 등록은 ADMIN(관리자), USER(부관리자) 모두 가능
                 .requestMatchers("/user/**").hasRole("ADMIN") // 회원 조회/수정/삭제는 ADMIN(관리자)만 허용
                 .requestMatchers(HttpMethod.POST, "/admin").permitAll() // 관리자 가입은 모두 허용

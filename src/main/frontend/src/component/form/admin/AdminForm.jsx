@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import './AdminForm.css';
 import * as Swal from '../../../api/common/alert';
 
 const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
 
-  const navigate = useNavigate();
   const [isRoleOpen, setIsRoleOpen] = useState(false); // isRoleOpen: 권한 선택 드롭다운이 열려 있는지 여부 (true: 열림/false: 닫힘)
   const [selectedRole, setSelectedRole] = useState(adminInfo?.authorities.includes("ROLE_ADMIN") ? 'ROLE_ADMIN' : 'ROLE_USER');
   const roleRef = useRef(null); // 드롭다운 외부 클릭 시 닫기 위한 ref
@@ -88,8 +86,8 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
             />
           </div>
 
-          <div className="custom-select" ref={roleRef}>
-            <label htmlFor="role">권한</label>
+          <div className="custom-select" ref={roleRef} aria-labelledby="role-label">
+            <label id="role-label">권한</label>
 
             <div
               className={`select-selected ${isRoleOpen ? 'select-arrow-active' : ''}`}

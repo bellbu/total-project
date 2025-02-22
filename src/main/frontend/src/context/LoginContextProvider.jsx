@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState, useCallback } from 'react';
 import api from '../api/login/api';
 import Cookies from 'js-cookie';
 import * as auth from '../api/login/auth';
@@ -37,7 +37,7 @@ const LoginContextProvider = ({children}) => {
     const [authorities, setAuthorities] = useState({isUser : false, isAdmin : false});
 
     // 이메일 저장 여부
-    const [rememberEmail, setRememberEmail] = useState();
+    // const [rememberEmail, setRememberEmail] = useState();
 
     // 로그인 체크 로딩 상태 (true: 로딩 중 / false: 로딩 완료)
     const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +52,7 @@ const LoginContextProvider = ({children}) => {
      * - jwt로 사용자 정보를 요청
      * -
      */
-    const loginCheck = async () => { // async (): 비동기 코드 실행
+    const loginCheck = useCallback(async () => { // async (): 비동기 코드 실행
         setIsLoading(true); // 로그인 체크 로딩 시작
         
         const accessToken = Cookies.get("accessToken");
@@ -88,14 +88,13 @@ const LoginContextProvider = ({children}) => {
         } finally {
             setIsLoading(false); // 로그인 체크 로딩 완료
         }
-    }
+    }, []);
 
     // 로그인
     const login = async(email, password) => {
 
         try {
             const response = await auth.login(email, password);
-            const data = response.data;
             const status = response.status;
             const headers = response.headers;
             const authorization = headers.authorization;
@@ -109,7 +108,7 @@ const LoginContextProvider = ({children}) => {
                 // 로그인 체크 (/users/{email} => userData)
                 loginCheck();
 
-                navigate("/main");
+                navigate("/mainPage");
 
             }
         } catch (error) {
@@ -201,7 +200,7 @@ const LoginContextProvider = ({children}) => {
     useEffect( () => {
         // 로그인 체크
         loginCheck();
-    }, []);
+    }, [loginCheck]);
 
     return (
         // LoginContext.Provider를 사용해 데이터와 함수를 Context에 전달
