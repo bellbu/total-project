@@ -31,6 +31,7 @@ export const alert = (title, text, icon, callback) => {
             htmlContainer: 'swal2-html-container',
             confirmButton: 'swal2-confirm',
         },
+        backdrop: false,  // 배경 클릭 시 기본 동작 방지
         didOpen: () => {
             // 스타일 동적 적용
             const titleEl = document.querySelector('.swal2-title');
@@ -62,6 +63,7 @@ export const confirm = (title, text, icon, callback) => {
             confirmButton: 'swal2-confirm',
             cancelButton: 'swal2-cancel'
         },
+        backdrop: false,  // 배경 클릭 시 기본 동작 방지
         didOpen: () => {
             // 스타일 동적 적용
             const titleEl = document.querySelector('.swal2-title');
