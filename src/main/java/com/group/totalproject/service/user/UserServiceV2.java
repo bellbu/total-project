@@ -61,11 +61,12 @@ public class UserServiceV2 {
 
     @Transactional(readOnly = true)
     public List<UserResponse> getUsers() {
-        return userRepository.findAll().stream() // findAll(): 메소드는 저장소에서 모든 사용자 데이터를 List<User> 형태로 가져옴
+        return userRepository.findAllByOrderByIdDesc().stream() // findAll(): 메소드는 저장소에서 모든 사용자 데이터를 List<User> 형태로 가져옴
                 //.map(user -> new UserResponse(user.getId(), user.getName(), user.getAge()))
                 .map(UserResponse::new) // map(): 스트림 요소를 사용하려는 형태로 변환하는 중간연산 / UserResponse::new(생성자 참조, (user) -> new UserResponse(user);와 동일한 형태) : User 객체를 UserResponse 객체로 변환
                 .collect(Collectors.toList());  // UserResponse 객체들을 다시 리스트 형태로 수집하는 최종연산
     }
+
     @Transactional
     public void updateUser(UserUpdateRequest request) {
 

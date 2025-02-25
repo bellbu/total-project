@@ -10,7 +10,7 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (roleRef.current && !roleRef.current.contains(event.target)) { // roleRef.current: 요소(드롭다운 영역)
+      if (roleRef.current && !roleRef.current.contains(event.target)) { // 사용자가 클릭한 요소(event.target)가 roleRef(드롭다운 영역) 내부에 있는지 확인
         setIsRoleOpen(false); // 드롭다운 영역 바깥을 클릭하면 드롭다운을 닫음
       }
     };
@@ -97,6 +97,7 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
             </div>
 
             {isRoleOpen && (  // isRoleOpen이 true인 경우 오른쪽 코드 렌더링 false인 경우 렌더링 되지 않음
+
               <div className="select-items">
                 <div
                   className={selectedRole === 'ROLE_ADMIN' ? 'same-as-selected' : ''}
@@ -118,7 +119,9 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
                   부관리자
                 </div>
               </div>
+
             )}
+
           </div>
 
             {/* 이메일 인증여부 추후에 추가 */}

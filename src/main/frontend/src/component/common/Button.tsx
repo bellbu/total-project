@@ -12,7 +12,7 @@ const Container = styled.div<{margin_top: string}>`
   justify-content: center;
   cursor: pointer;
   margin-top: ${props => props.margin_top};
-  
+
   &:hover {
     opacity: 0.9;
   }

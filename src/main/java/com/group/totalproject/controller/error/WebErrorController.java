@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class WebErrorController implements ErrorController {
-    @GetMapping({"/", "/error", "/loginPage", "/joinPage", "/mainPage", "userPage", "adminPage"})
+    @GetMapping(value = {"/{path:[^\\.]*}"})
     public String index() {
         return "forward:/index.html";
     }
