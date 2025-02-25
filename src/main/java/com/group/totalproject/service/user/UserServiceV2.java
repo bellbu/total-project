@@ -7,6 +7,8 @@ import com.group.totalproject.dto.user.request.UserCreateRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,8 +62,11 @@ public class UserServiceV2 {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponse> getUsers() {
-        return userRepository.findAllByOrderByIdDesc().stream() // findAll(): 메소드는 저장소에서 모든 사용자 데이터를 List<User> 형태로 가져옴
+    public List<UserResponse> getUsers(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        return userRepository.findAll(pageRequest) // 조회된 사용자 데이터를 List<User> 형태로 가져옴
+                .getContent()
+                .stream()
                 //.map(user -> new UserResponse(user.getId(), user.getName(), user.getAge()))
                 .map(UserResponse::new) // map(): 스트림 요소를 사용하려는 형태로 변환하는 중간연산 / UserResponse::new(생성자 참조, (user) -> new UserResponse(user);와 동일한 형태) : User 객체를 UserResponse 객체로 변환
                 .collect(Collectors.toList());  // UserResponse 객체들을 다시 리스트 형태로 수집하는 최종연산
