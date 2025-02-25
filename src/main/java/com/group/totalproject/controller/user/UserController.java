@@ -88,5 +88,9 @@ public class UserController { // Controller: API와 HTTP 담당
         }
     }
 
+    @GetMapping("/user/count")
+    public ResponseEntity<Long> getUserCount() {
+        return ResponseEntity.ok(userService.getUserCount());
+    }
 
 }

@@ -113,4 +113,9 @@ public class UserServiceV2 {
         userRepository.delete(user);
 
     }
+
+    @Transactional(readOnly = true)
+    public long getUserCount() {
+        return userRepository.count(); // JpaRepository에서 기본 제공하는 메서드
+    }
 }

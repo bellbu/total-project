@@ -13,6 +13,7 @@ const Container = styled.div`
 
 const UserListPage = () => {
   const [userList, setUserList] = useState<UserData[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
@@ -54,6 +55,18 @@ const UserListPage = () => {
     return () => observer.disconnect()
   }, [loadUsers])
 
+  useEffect(() => {
+    const fetchTotalCount = async () => {
+      try {
+        const count = await UserApi.getUserCount()
+        setTotalCount(count)
+      } catch (error) {
+        console.error('Failed to load total count:', error)
+      }
+    }
+    fetchTotalCount()
+  }, [])
+
   const handleUserUpdate = (userId: number, newName: string) => {
     setUserList(prev =>
       prev.map(user =>
@@ -68,7 +81,7 @@ const UserListPage = () => {
 
   return (
     <Container>
-      <UserListTableHeader userCount={userList.length} />
+      <UserListTableHeader userCount={totalCount} />
       {userList.map(item => (
         <UserListTableItem
           key={item.id}

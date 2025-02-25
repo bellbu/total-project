@@ -17,4 +17,8 @@ export class UserApi {
   static deleteUser = (name: string) => {
     return request(RequestMethod.DELETE, 'user', {name}, {})
   }
+
+  static getUserCount = () => {
+    return request<number>(RequestMethod.GET, 'user/count', {}, {})
+  }
 }
