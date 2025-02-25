@@ -47,52 +47,36 @@ const Title = styled.p`
 interface Props {
   userId: number;
   currentName: string;
-  refresh: () => void;
+  onUpdate: (userId: number, newName: string) => void;
   onClose: () => void;
 }
 
-const UserNameEditModal = ({userId, currentName, refresh, onClose}: Props) => {
+const UserNameEditModal = ({userId, currentName, onUpdate, onClose}: Props) => {
   return createPortal(
       <UserNameEditModalContent
         userId={userId}
         currentName={currentName}
-        refresh={refresh}
+        onUpdate={onUpdate}
         onClose={onClose}
       />,
       document.getElementById('root')!
   );
 };
 
-const UserNameEditModalContent = ({userId, currentName, refresh, onClose}: Props) => {
+const UserNameEditModalContent = ({userId, currentName, onUpdate, onClose}: Props) => {
   const [newName, setNewName] = useState<string>('')
 
   const edit = () => {
-/*
-
-    if (!newName.trim()) {
-        Swal.alert('새 이름을 입력해 주세요.');
-        return;
-    }
-
-    // 정규식: 영어 또는 한글로 시작하고, 뒤에 숫자가 올 수 있는 패턴만 허용
-    const nameRegex = /^[a-zA-Z가-힣]+[0-9]*$/;
-    if (!nameRegex.test(newName)) {
-        Swal.alert('이름은 영어 또는 한글로 시작하고, \n뒤에 숫자를 입력할 수 있습니다.');
-        return;
-    }
- */
-
     UserApi.putUser(userId, newName)
-        .then(() => {
-            Swal.alert('이름이 성공적으로 수정되었습니다!', '', 'success');
-            onClose()
-            refresh()
-        })
-        .catch((error) => {
-            // 백엔드에서 받은 에러 메시지를 화면에 표시
-            const errorMessage = error?.data || '오류가 발생했습니다.';
-            Swal.alert(errorMessage, '', 'error');
-        });
+      .then(() => {
+        onUpdate(userId, newName)
+        Swal.alert('이름이 성공적으로 수정되었습니다!', '', 'success')
+        onClose()
+      })
+      .catch((error) => {
+        const errorMessage = error?.data || '오류가 발생했습니다.'
+        Swal.alert(errorMessage, '', 'error')
+      })
   }
 
   return (
