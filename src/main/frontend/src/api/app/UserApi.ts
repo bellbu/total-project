@@ -6,8 +6,8 @@ export class UserApi {
     return request(RequestMethod.POST, 'user', {}, {name, age})
   }
 
-  static getUser = () => {
-    return request<UserData[]>(RequestMethod.GET, 'user', {}, {})
+  static getUser = (page: number, size: number = 10000) => {
+    return request<UserData[]>(RequestMethod.GET, 'user', { page, size }, {})
   }
 
   static putUser = (id: number, name: string) => {
