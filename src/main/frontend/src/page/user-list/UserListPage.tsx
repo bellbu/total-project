@@ -15,19 +15,24 @@ const UserListPage = () => {
   const [userList, setUserList] = useState<UserData[]>([])
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
-  const loadUsers = useCallback(() => {
-    if (!hasMore) return
+  const loadUsers = useCallback(async () => {
+    if (!hasMore || isLoading) return
 
-    UserApi.getUser(page)
-      .then(data => {
-        console.log(data);
-        setUserList(prev => [...prev, ...data])
-        setHasMore(data.length === 10)
-        setPage(prev => prev + 1)
-      })
-  }, [page, hasMore])
+    try {
+      setIsLoading(true)
+      const data = await UserApi.getUser(page)
+      setUserList(prev => [...prev, ...data])
+      setHasMore(data.length === 1000)
+      setPage(prev => prev + 1)
+    } catch (error) {
+      console.error('Failed to load users:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [page, hasMore, isLoading])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -36,7 +41,10 @@ const UserListPage = () => {
           loadUsers()
         }
       },
-      { threshold: 0.5 }
+      { 
+        threshold: 0.1,
+        rootMargin: '100px'
+      }
     )
 
     if (observerTarget.current) {
