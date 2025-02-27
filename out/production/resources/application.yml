@@ -1,31 +1,8 @@
+# 개발서버 설정
 spring:
   config:
     activate:
       on-profile: local
-  datasource:
-    url: "jdbc:h2:mem:library;MODE=MYSQL;NON_KEYWORDS=USER" #H2 사용하기 위한 url 설정 / NON_KEYWORDS=USER: USER 예약어 해제
-    username: "sa"
-    password: ""
-    driver-class-name: org.h2.Driver #DB 접속을 위한 Driver
-  jpa:
-    hibernate:
-      ddl-auto: create #서버 시작될 때 마다 테이블 제거하고 자동으로 생성해 줌
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect #JPA 방언 H2Dialect로 변경
-  h2:
-    console:
-      enabled: true #web console 활성화
-      path: /h2-console #활성화된 H2 web console의 주소
-
---- #구분선
-
-spring:
-  config:
-    activate:
-      on-profile: dev
   datasource:
     url: "jdbc:mysql://localhost/library"  #스프링이 데이터를 연결할 주소: mysql(데이터베이스 종류)/localhost(mysql 서버 주소)/library(사용할 데이터베이스)
     username: "root"  #계정 아이디
@@ -39,6 +16,10 @@ spring:
         show_sql: true  #JPA 사용해 DB에 SQL을 날릴 때 SQL을 보여줄 지 설정
         format_sql: true #SQL을 보여줄 때 서식에 맞춰서 보여줄 지 설정
         dialect: org.hibernate.dialect.MySQL8Dialect #DB를 특정하면 해당 문법에 맞춰서 SQL을 수정
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 logging:
   lever:
@@ -46,6 +27,41 @@ logging:
 
 jwt:
   header: Authorization
-  # HS512 알고리즘의 시크릿키 : 512비트 (64바이트) 이상('silvernine-tech-spring-boot-jwt-tutorial-secret-silvernine-tech-spring-boot-jwt-tutorial-secret' 문자열을 base64로 인코딩)
+  # HS512 알고리즘의 시크릿키 : 512비트(64바이트) 이상('silvernine-tech-spring-boot-jwt-tutorial-secret-silvernine-tech-spring-boot-jwt-tutorial-secret' 문자열을 base64로 인코딩)
   secret-key: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
   token-validity-in-seconds: 86400 # JWT 토큰의 유효 기간(초 단위)
+
+
+---  
+
+# 운영서버 설정
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: "jdbc:mysql://localhost/library" 
+    username: "root"  
+    password: "0000"
+    driver-class-name: com.mysql.cj.jdbc.Driver  
+  jpa:
+    hibernate:
+      ddl-auto: update 
+    properties:
+      hibernate:
+        show_sql: true  
+        format_sql: true 
+        dialect: org.hibernate.dialect.MySQL8Dialect 
+  data:
+    redis:
+      host: instagram-cache-server.vzvxyg.ng.0001.apn2.cache.amazonaws.com
+      port: 6379
+
+logging:
+  lever:
+    org.springframework.cache: trace 
+
+jwt:
+  header: Authorization
+  secret-key: YmVsbGJ1LXNpbHZlcm5pbmUtdGVjaC1zcHJpbmctYm9vdC1qd3QtdHV0b3JpYWwtc2VjcmV0LWJlbGxidS1zaWx2ZXJuaW5lLXRlY2gtc3ByaW5nLWJvb3Qtand0LXR1dG9yaWFsLXNlY3JldA
+  token-validity-in-seconds: 86400
