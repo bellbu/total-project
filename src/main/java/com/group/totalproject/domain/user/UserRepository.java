@@ -3,8 +3,6 @@ package com.group.totalproject.domain.user;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> { // 인터페이스를 생성 후, JpaRepository<Entity 클래스, PK 타입>를 상속하면 기본적인 CRUD 메소드가 자동으로 생성됨 / UserRepository는 스프링 빈에 등록됨
@@ -19,6 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> { // 인터페
     boolean existsByName(String name);
 
     // 최신 가입자부터 정렬
-    List<User> findAllByOrderByIdDesc();
+    // List<User> findAllByOrderByIdDesc();
 
 }

@@ -22,7 +22,7 @@ spring:
       port: 6379
 
 logging:
-  lever:
+  level:
     org.springframework.cache: trace # Redis 사용에 대한 로그가 조회되도록 설정
 
 jwt:
@@ -58,7 +58,7 @@ spring:
       port: 6379
 
 logging:
-  lever:
+  level:
     org.springframework.cache: trace 
 
 jwt:

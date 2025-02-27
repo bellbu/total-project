@@ -44,12 +44,10 @@ tasks.named('test') {
 	useJUnitPlatform() // 테스트를 실행할 때 JUnit Platform을 사용(JUnit 5 기반의 테스트 환경을 사용)
 }
 
-task copyPrivate(type: Copy) {
-	copy {
-		from './submodule-data/total-project'
-		include "*.yml"
-		into 'src/main/resources'
-	}
+tasks.register('copyPrivate', Copy) {
+	from './submodule-data/total-project'
+	include "*.yml"
+	into 'src/main/resources'
 }
 
 // React 빌드 설정
@@ -66,32 +64,33 @@ processResources { // Spring Boot 리소스 처리 작업 실행
 	dependsOn "copyReactBuildFiles" // copyReactBuildFiles 작업이 성공적으로 완료된 후에만 processResources 실행
 }
 
-task installReact(type: Exec) { // React 의존성 설치 및 취약점 수정
-	workingDir "$frontendDir" // 작업 디렉토리 설정
-	inputs.dir "$frontendDir" // 입력 디렉토리 설정 (React 디렉토리에 변경이 없으면 작업 생략)
-	group = BasePlugin.BUILD_GROUP // Gradle 빌드 작업 그룹에 해당 작업을 포함시킴
+tasks.register('installReact', Exec) {
+	workingDir "$frontendDir"
+	inputs.dir "$frontendDir"
+	group = BasePlugin.BUILD_GROUP
 	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine "npm.cmd", "audit", "fix" // npm audit fix: 취약점 수정
-		commandLine 'npm.cmd', 'install' }  // npm install: package.json 파일에 정의된 의존성 설치
-	else {
-		commandLine "npm", "audit", "fix" commandLine 'npm', 'install'
+		commandLine "npm.cmd", "audit", "fix"
+		commandLine "npm.cmd", "install"
+	} else {
+		commandLine "npm", "audit", "fix"
+		commandLine "npm", "install"
 	}
 }
 
-task buildReact(type: Exec) { // buildReact(type: Exec): 빌드 실행
-	dependsOn "installReact" // installReact 작업이 성공적으로 완료된 후에만 buildReact 실행
-	workingDir "$frontendDir"  // 작업 디렉토리 설정
-	inputs.dir "$frontendDir"  // 입력 디렉토리 설정 (React 디렉토리에 변경이 없으면 작업 생략)
-	group = BasePlugin.BUILD_GROUP  // Gradle 빌드 작업 그룹에 해당 작업을 포함시킴
+tasks.register('buildReact', Exec) {
+	dependsOn "installReact"
+	workingDir "$frontendDir"
+	inputs.dir "$frontendDir"
+	group = BasePlugin.BUILD_GROUP
 	if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-		commandLine "npm.cmd", "run-script", "build" // npm run build: React 프로젝트 빌드 실행
+		commandLine "npm.cmd", "run-script", "build"
 	} else {
 		commandLine "npm", "run-script", "build"
 	}
 }
 
-task copyReactBuildFiles(type: Copy) { // copyReactBuildFiles(type: Copy): React 발드 결과물을 Spring Boot로 복사
-	dependsOn "buildReact" // buildReact 작업이 성공적으로 완료된 후에만 copyReactBuildFiles 실행
-	from "$frontendDir/build"  // 복사할 파일의 원본 디렉토리 지정
-	into "$projectDir/src/main/resources/static" // 복사된 파일의 대상 디렉토리를 지정
+tasks.register('copyReactBuildFiles', Copy) {
+	dependsOn "buildReact"
+	from "$frontendDir/build"
+	into "$projectDir/src/main/resources/static"
 }

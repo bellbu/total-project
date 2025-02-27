@@ -7,6 +7,7 @@ import com.group.totalproject.dto.user.request.UserCreateRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,9 @@ public class UserServiceV2 {
         userRepository.save(new User(request.getName(), request.getAge()));
     }
 
+    // @Cacheable: 메서드 실행 결과를 캐시에 저장
+    // Cache Aside 전략으로 캐싱 적용 (cacheNames: 캐시 이름을 설정 / key: Redis에 저장할 Key의 이름을 설정(#변수: 매개변수 값) / cacheManager: RedisCacheConfig에서 사용할 cacheManager의 Bean 이름을 지정)
+    @Cacheable(cacheNames = "getUsers", key = "'users:page:' + #page + ':size:' + #size", cacheManager = "userCacheManager")
     @Transactional(readOnly = true)
     public List<UserResponse> getUsers(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));

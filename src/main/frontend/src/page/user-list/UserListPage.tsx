@@ -96,7 +96,7 @@ const UserListPage = () => {
 
   return (
     <Container>
-      <UserListTableHeader userCount={totalCount} />
+      <UserListTableHeader userCount={totalCount} searchedCount={userList.length} />
       {userList.map(item => (
         <UserListTableItem
           key={item.id}
