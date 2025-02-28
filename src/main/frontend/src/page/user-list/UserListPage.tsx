@@ -7,6 +7,7 @@ import UserListTableItem from "../../component/user-list/UserListTableItem";
 import Lottie from "lottie-react";
 import loadingAnimation from "../../resource/icon/loading.json";
 import * as Swal from '../../api/common/alert';
+import { PAGE_SIZE } from '../../constants/pageSize';
 
 const Container = styled.div`
   display: flex;
@@ -24,7 +25,7 @@ const LoadingWrapper = styled.div`
 const UserListPage = () => {
   const [userList, setUserList] = useState<UserData[]>([]); // userList: 조회 회원 목록 저장
   const [totalCount, setTotalCount] = useState(0); // totalCount: 전체 회원 수 저장
-  const [page, setPage] = useState(0); // 현재 페이지 번호 저장
+  const [cursor, setCursor] = useState<number | null>(null); // 🔄 page 번호 -> cursor(마지막 id값)로 변경
   const [hasMore, setHasMore] = useState(true); // 추가 테이터 조회 여부
   const [isLoading, setIsLoading] = useState(false); // 로딩 표시 여부
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -34,17 +35,23 @@ const UserListPage = () => {
 
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 회원 조회 O
-      const data = await UserApi.getUser(page); // 현재 페이지 값으로 회원 조회 api 호출
+      const data = await UserApi.getUser(cursor, PAGE_SIZE); // 현재 페이지 값으로 회원 조회 api 호출
+
       setUserList(prev => [...prev, ...data]); // prev(기존의 userList)와 data(새로운 회원 목록) 배열 병합
-      setHasMore(data.length === 1000); // 데이터 1000개씩 조회하므로 1000미만인 경우 불러올 데이터 없다고 판단하여 false로 세팅
-      setPage(prev => prev + 1); // 페이지 1 증가
+
+      if(data.length > 0) {
+          // 🔄 마지막 요소의 ID를 cursor로 설정
+          setCursor(data[data.length -1].id);
+      }
+
+      setHasMore(data.length >= PAGE_SIZE); // 데이터 PAGE_SIZE 맞게 조회, PAGE_SIZE 미만인 경우 불러올 데이터 없다고 판단하여 false로 세팅
     } catch (error) {
       console.error('Failed to load users:', error);
       Swal.alert(error, '', 'error');
     } finally {
       setIsLoading(false); // isLoading이 false인 경우 => 회원 조회 X
     }
-  }, [page, hasMore, isLoading]);
+  }, [cursor, hasMore, isLoading]);
 
   useEffect(() => {
     // observer(IntersectionObserver 객체) 선언

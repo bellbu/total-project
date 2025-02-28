@@ -6,6 +6,7 @@ import FormInput from "../common/FormInput";
 import Button from "../common/Button";
 import {UserApi} from "../../api/app/UserApi";
 import * as Swal from '../../api/common/alert';
+import { PAGE_SIZE } from '../../constants/pageSize';
 
 const Container = styled.div`
   width: 50%;
@@ -48,7 +49,7 @@ const UserRegisterForm = () => {
         return;
     }
 
-    UserApi.postUser(name, isNaN(parseInt(age)) ? null : parseInt(age))
+    UserApi.postUser(name, isNaN(parseInt(age)) ? null : parseInt(age), PAGE_SIZE)
       .then(data => {
         Swal.alert('등록에 성공했습니다!', '', 'success');
         setName('');

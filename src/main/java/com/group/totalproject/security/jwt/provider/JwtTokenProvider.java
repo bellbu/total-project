@@ -110,9 +110,6 @@ public class JwtTokenProvider {
                                         .build()
                                         .parseSignedClaims(jwt);
 
-            log.info("##### 토큰 만료 기간 #####");
-            log.info("-> " + parsedToken.getPayload().getExpiration());
-
             Date exp = parsedToken.getPayload().getExpiration(); // 만료 시간
 
             //

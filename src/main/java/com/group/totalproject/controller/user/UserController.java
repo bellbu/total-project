@@ -22,7 +22,7 @@ public class UserController { // Controller: API와 HTTP 담당
     @PostMapping("/user") // 등록
     public ResponseEntity<?> saveUser(@RequestBody UserCreateRequest request) { // @RequestBody: HTTP 요청의 바디에 담긴 값들을 자바객체로 변환시켜 객체에 저장
         try {
-            userService.saveUser(request);
+            userService.saveUser(request, request.getPageSize());
             return ResponseEntity.ok("회원 등록이 완료되었습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -32,9 +32,9 @@ public class UserController { // Controller: API와 HTTP 담당
     @GetMapping("/user") // 목록보기
     @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 'ROLE_' 접두사를 포함한 전체 권한명 사용
     public ResponseEntity<List<UserResponse>> getUsers(
-        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "1000") int size
+        @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "1000") int size
     ) {
-        return ResponseEntity.ok(userService.getUsers(page, size));
+        return ResponseEntity.ok(userService.getUsers(cursor, size));
 
         /* 첫번째
         List<UserResponse> responses = new ArrayList<>();
