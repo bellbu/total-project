@@ -44,7 +44,8 @@ const UserListPage = () => {
           setCursor(data[data.length -1].id);
       }
 
-      setHasMore(data.length >= PAGE_SIZE); // 데이터 PAGE_SIZE 맞게 조회, PAGE_SIZE 미만인 경우 불러올 데이터 없다고 판단하여 false로 세팅
+      // 🔥 서버에서 더 이상 데이터가 없을 경우만 hasMore을 false로 설정
+      setHasMore(data.length > 0);
     } catch (error) {
       console.error('Failed to load users:', error);
       Swal.alert(error, '', 'error');

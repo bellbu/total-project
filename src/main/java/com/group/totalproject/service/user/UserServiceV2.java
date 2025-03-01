@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +25,7 @@ public class UserServiceV2 {
     private final UserRepository userRepository; // UserRepository는 JpaRepository를 상속됨
     private final UserLoanHistoryRepository userLoanHistoryRepository;
     private final RedisTemplate<String, List<UserResponse>> redisTemplate;
+    private final RedisTemplate<String, String> indexRedisTemplate; // 역 인덱스 저장용
 
     // 아래 있는 함수가 시작될 때 start transaction;을 해준다 (트랜잭션을 시작!)
     // 함수가 예외 없이 잘 끝났다면 commit;
@@ -68,13 +67,18 @@ public class UserServiceV2 {
         User newUser = userRepository.save(new User(request.getName(), request.getAge()));
 
         // ✅ 첫 번째 페이지 캐시 키
-        String firstPageCacheKey = "getUsers::users:cursor:start:size:10";
+        String firstPageCacheKey = "getUsers::users:cursor:0:size:" + pageSize;
 
         // ✅ 기존 캐시 조회
         List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(firstPageCacheKey);
-        List<UserResponse> updatedUsers = (cachedUsers != null) ? new ArrayList<>(cachedUsers) : new ArrayList<>();
 
-        // ✅ 새로운 회원을 맨 앞에 추가
+        // ✅ 조회된 캐시 데이터가 없으면 DB에만 저장 후 종료
+        if (cachedUsers == null || cachedUsers.isEmpty()) {
+            return;
+        }
+
+        // ✅ 조회된 캐시 데이터가 있을 경우 새로운 회원을 맨 앞에 추가
+        List<UserResponse> updatedUsers = new ArrayList<>(cachedUsers);
         updatedUsers.add(0, new UserResponse(newUser));
 
         // ✅ 기존 TTL 가져오기 (초 단위)
@@ -83,15 +87,18 @@ public class UserServiceV2 {
         // ✅ Long → Duration 변환 (TTL 유지)
         Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                 ? Duration.ofSeconds(ttlInSeconds)
-                : Duration.ofMinutes(10); // 기본 TTL 10분
+                : Duration.ofMinutes(5); // 기본 TTL 5분
 
         // ✅ TTL 유지하면서 캐시 저장
         redisTemplate.opsForValue().set(firstPageCacheKey, updatedUsers, currentTTL);
+
+        // ✅ 역 인덱스 저장
+        indexRedisTemplate.opsForSet().add("userCacheIndex::" + newUser.getId(), firstPageCacheKey);
     }
 
     // @Cacheable: 메서드 실행 결과를 캐시에 저장
     // Cache Aside 전략으로 캐싱 적용 (cacheNames: 캐시 이름을 설정 / key: Redis에 저장할 Key의 이름을 설정(#변수: 매개변수 값) / cacheManager: RedisCacheConfig에서 사용할 cacheManager의 Bean 이름을 지정)
-    @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: 'start') + ':size:' + #size", cacheManager = "userCacheManager")
+    @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: '0') + ':size:' + #size", cacheManager = "userCacheManager")
     @Transactional(readOnly = true)
     public List<UserResponse> getUsers(Long cursor, int size) {
         Pageable pageable = PageRequest.of(0, size);  // ✅ Pageable 객체 생성
@@ -146,17 +153,89 @@ public class UserServiceV2 {
     }
 
     @Transactional
-    public void deleteUser(String name) {
-
+    public void deleteUser(String name, int pageSize) {
         User user = userRepository.findByName(name)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
 
         // 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
         if (userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId())) {
             throw new IllegalArgumentException("대출 중인 회원은 삭제할 수 없습니다. \n반납 후 다시 시도해주세요.");
         }
 
+        // ✅ 회원 삭제 (DB 먼저 삭제)
         userRepository.delete(user);
+
+        // ✅ Redis에서 해당 회원이 포함된 캐시 삭제 (Look Aside)
+        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + pageSize);
+        if (cacheKeys != null) {
+            for (String cacheKey : cacheKeys) {
+                String[] parts = cacheKey.split(":");
+                System.out.println("파트 : "+Arrays.toString(parts));
+
+                if (parts.length < 5) {
+                    System.out.println("잘못된 캐시 키 구조: " + cacheKey);
+                    continue;
+                }
+
+                Long cursor;
+                try {
+                    cursor = Long.parseLong(parts[4]);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+
+                // ✅ id < cursor <= id + pageSize 조건 확인
+                if (cursor == 0 || cursor > user.getId() && cursor <= user.getId() + pageSize) {
+                    System.out.println("필터링된 캐시키: " + cacheKey);
+                    List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
+                    if (cachedUsers != null && cachedUsers.removeIf(u -> Long.valueOf(u.getId()).equals(user.getId()))) {
+                        // ✅ 기존 TTL 유지 (만료 시간이 0보다 클 경우 유지)
+                        Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
+                        Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
+                                ? Duration.ofSeconds(ttlInSeconds)
+                                : Duration.ofMinutes(5); // 기본 TTL 5분
+
+                        // ✅ 캐시 업데이트 (삭제된 회원이 반영된 리스트 저장)
+                        redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
+                    }
+                }
+            }
+        }
+
+        /*
+        // ✅ 회원 삭제 (DB 먼저 삭제)
+        userRepository.delete(user);
+
+        // ✅ Redis에서 해당 회원이 포함된 캐시 삭제 (Look Aside)
+        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:"+pageSize);
+        if (cacheKeys != null) {
+            for (String cacheKey : cacheKeys) {
+                System.out.println("캐시키 : "+cacheKey);
+                List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
+                if (cachedUsers != null && cachedUsers.removeIf(u -> Long.valueOf(u.getId()).equals(user.getId()))) {                    // ✅ 기존 TTL 유지 (만료 시간이 0보다 클 경우 유지)
+                    Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
+                    Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
+                            ? Duration.ofSeconds(ttlInSeconds)
+                            : Duration.ofMinutes(5); // 기본 TTL 5분
+
+                    // ✅ 캐시 업데이트 (삭제된 회원이 반영된 리스트 저장)
+                    redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
+                }
+            }
+        }
+        */
+
+        /*
+        // 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
+        User user = userRepository.findByName(name)
+                .orElseThrow(IllegalArgumentException::new);
+
+        if (userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId())) {
+            throw new IllegalArgumentException("대출 중인 회원은 삭제할 수 없습니다. \n반납 후 다시 시도해주세요.");
+        }
+
+        userRepository.delete(user);
+        */
 
     }
 

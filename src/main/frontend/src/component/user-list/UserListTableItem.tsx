@@ -5,6 +5,7 @@ import Button from "../common/Button";
 import {UserApi} from "../../api/app/UserApi";
 import UserNameEditModal from "./UserNameEditModal";
 import * as Swal from "../../api/common/alert";
+import { PAGE_SIZE } from '../../constants/pageSize';
 
 const Container = styled.div`
   position: relative;
@@ -56,7 +57,7 @@ const UserListTableItem = ({ data, onUpdate, onDelete }: Props) => {
   const deleteUser = () => {
     Swal.confirm("회원 삭제", "정말로 삭제하시겠습니까?", "warning", (result: any) => {
       if (result.isConfirmed) {
-        UserApi.deleteUser(data.name)
+        UserApi.deleteUser(data.name, PAGE_SIZE)
           .then(() => {
             onDelete(data.name)
             Swal.alert("삭제 완료", "사용자가 삭제되었습니다.", "success")

@@ -31,7 +31,7 @@ public class RedisCacheConfig { // Redis 캐시 설정
                                 new Jackson2JsonRedisSerializer<Object>(Object.class)
                         )
                 )
-                .entryTtl(Duration.ofMinutes(10)); // 캐시 데이터 유효기간(TTL) 10분 설정
+                .entryTtl(Duration.ofMinutes(5)); // 캐시 데이터 TTL 5분 설정
         
         return RedisCacheManager // RedisCacheManager 객체를 빌드하는 유틸리티 클래스
                 .RedisCacheManagerBuilder

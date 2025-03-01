@@ -1,6 +1,7 @@
 package com.group.totalproject.controller.user;
 
 import com.group.totalproject.dto.user.request.UserCreateRequest;
+import com.group.totalproject.dto.user.request.UserDeleteRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
 import com.group.totalproject.service.user.UserServiceV2;
@@ -78,9 +79,9 @@ public class UserController { // Controller: API와 HTTP 담당
     }
 
     @DeleteMapping("/user") // 삭제
-    public ResponseEntity<?> deleteUser(@RequestParam("name") String name) {
+    public ResponseEntity<?> deleteUser(@RequestBody UserDeleteRequest request) {
         try {
-            userService.deleteUser(name);
+            userService.deleteUser(request.getName(), request.getPageSize());
             return ResponseEntity.ok("회원이 삭제되었습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

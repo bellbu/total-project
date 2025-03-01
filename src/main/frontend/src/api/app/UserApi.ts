@@ -14,8 +14,8 @@ export class UserApi {
     return request(RequestMethod.PUT, 'user', {}, {id, name})
   }
 
-  static deleteUser = (name: string) => {
-    return request(RequestMethod.DELETE, 'user', {name}, {})
+  static deleteUser = (name: string, pageSize: number) => {
+    return request(RequestMethod.DELETE, 'user', {}, {name, pageSize})
   }
 
   static getUserCount = () => {
