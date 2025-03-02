@@ -146,14 +146,60 @@ public class UserServiceV2 {
         User user = userRepository.findById(request.getId()) // findById: id를 기준으로 1개의 데이터를 가져옴. Optional<User> 형태로 반환
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다. ID: " + request.getId())); // Optional의 orElseThrow: 데이터가 없는 경우(해당 id가 없는 경우) 예외를 던짐
 
-        // 4. 객체 이름 변경
+        // 5. 객체 이름 변경
         user.updateName(request.getName());
+
+        // 6. Redis에서 해당 회원이 포함된 캐시만 찾아서 수정
+        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + request.getPageSize());
+        if (cacheKeys != null) {
+            for (String cacheKey : cacheKeys) {
+                String[] parts = cacheKey.split(":");
+
+                if (parts.length < 5) {
+                    System.out.println("잘못된 캐시 키 구조: " + cacheKey);
+                    continue;
+                }
+
+                Long cursor;
+                try {
+                    cursor = Long.parseLong(parts[4]); // cursor 값 가져오기
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+
+                // ✅ id < cursor <= id + pageSize 조건 확인 (해당 회원이 포함된 캐시만 찾기)
+                if (cursor == 0 || (cursor > request.getId() && cursor <= request.getId() + request.getPageSize())) {
+                    List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
+                    if (cachedUsers != null) {
+                        List<UserResponse> updatedUsers = new ArrayList<>();
+                        for (UserResponse u : cachedUsers) {
+                            if (u.getId() == request.getId()) {
+                                // ✅ 새로운 UserResponse 객체로 변경
+                                updatedUsers.add(new UserResponse(u.getId(), request.getName(), u.getAge()));
+                            } else {
+                                updatedUsers.add(u);
+                            }
+                        }
+
+                        // ✅ 기존 TTL 유지 (만료 시간이 0보다 크면 유지)
+                        Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
+                        Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
+                                ? Duration.ofSeconds(ttlInSeconds)
+                                : Duration.ofMinutes(5); // 기본 TTL 5분
+
+                        // ✅ 변경된 데이터 Redis에 반영
+                        redisTemplate.opsForValue().set(cacheKey, updatedUsers, currentTTL);
+                    }
+                }
+            }
+        }
+
     }
 
     @Transactional
     public void deleteUser(String name, int pageSize) {
         User user = userRepository.findByName(name)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 
         // 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
         if (userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId())) {
@@ -168,7 +214,6 @@ public class UserServiceV2 {
         if (cacheKeys != null) {
             for (String cacheKey : cacheKeys) {
                 String[] parts = cacheKey.split(":");
-                System.out.println("파트 : "+Arrays.toString(parts));
 
                 if (parts.length < 5) {
                     System.out.println("잘못된 캐시 키 구조: " + cacheKey);
@@ -184,7 +229,6 @@ public class UserServiceV2 {
 
                 // ✅ id < cursor <= id + pageSize 조건 확인
                 if (cursor == 0 || cursor > user.getId() && cursor <= user.getId() + pageSize) {
-                    System.out.println("필터링된 캐시키: " + cacheKey);
                     List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
                     if (cachedUsers != null && cachedUsers.removeIf(u -> Long.valueOf(u.getId()).equals(user.getId()))) {
                         // ✅ 기존 TTL 유지 (만료 시간이 0보다 클 경우 유지)

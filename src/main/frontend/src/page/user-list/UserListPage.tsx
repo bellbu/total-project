@@ -111,6 +111,7 @@ const UserListPage = () => {
           data={item}
           onUpdate={handleUserUpdate}
           onDelete={handleUserDelete}
+          pageSize={PAGE_SIZE}
         />
       ))}
 

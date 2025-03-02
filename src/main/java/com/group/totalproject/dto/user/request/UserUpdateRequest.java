@@ -1,15 +1,10 @@
 package com.group.totalproject.dto.user.request;
 
-public class UserUpdateRequest {
+import lombok.Getter;
 
+@Getter
+public class UserUpdateRequest {
     private long id;
     private String name;
-
-    public long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
+    private int pageSize;
 }

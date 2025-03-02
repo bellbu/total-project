@@ -5,7 +5,6 @@ import Button from "../common/Button";
 import {UserApi} from "../../api/app/UserApi";
 import UserNameEditModal from "./UserNameEditModal";
 import * as Swal from "../../api/common/alert";
-import { PAGE_SIZE } from '../../constants/pageSize';
 
 const Container = styled.div`
   position: relative;
@@ -49,15 +48,16 @@ interface Props {
   data: UserData
   onUpdate: (userId: number, newName: string) => void
   onDelete: (userName: string) => void
+  pageSize: number;
 }
 
-const UserListTableItem = ({ data, onUpdate, onDelete }: Props) => {
+const UserListTableItem = ({ data, onUpdate, onDelete, pageSize }: Props) => {
   const [isEditModalOpen, setEditModalOpen] = useState(false)
 
   const deleteUser = () => {
     Swal.confirm("회원 삭제", "정말로 삭제하시겠습니까?", "warning", (result: any) => {
       if (result.isConfirmed) {
-        UserApi.deleteUser(data.name, PAGE_SIZE)
+        UserApi.deleteUser(data.name, pageSize)
           .then(() => {
             onDelete(data.name)
             Swal.alert("삭제 완료", "사용자가 삭제되었습니다.", "success")
@@ -88,6 +88,7 @@ const UserListTableItem = ({ data, onUpdate, onDelete }: Props) => {
           currentName={data.name}
           onUpdate={onUpdate}
           onClose={() => setEditModalOpen(false)}
+          pageSize={pageSize}
         />
       )}
     </Container>

@@ -49,25 +49,27 @@ interface Props {
   currentName: string;
   onUpdate: (userId: number, newName: string) => void;
   onClose: () => void;
+  pageSize: number;
 }
 
-const UserNameEditModal = ({userId, currentName, onUpdate, onClose}: Props) => {
+const UserNameEditModal = ({userId, currentName, onUpdate, onClose, pageSize}: Props) => {
   return createPortal(
       <UserNameEditModalContent
         userId={userId}
         currentName={currentName}
         onUpdate={onUpdate}
         onClose={onClose}
+        pageSize={pageSize}
       />,
       document.getElementById('root')!
   );
 };
 
-const UserNameEditModalContent = ({userId, currentName, onUpdate, onClose}: Props) => {
+const UserNameEditModalContent = ({userId, currentName, onUpdate, onClose, pageSize}: Props) => {
   const [newName, setNewName] = useState<string>('')
 
   const edit = () => {
-    UserApi.putUser(userId, newName)
+    UserApi.putUser(userId, newName, pageSize)
       .then(() => {
         onUpdate(userId, newName)
         Swal.alert('이름이 성공적으로 수정되었습니다!', '', 'success')

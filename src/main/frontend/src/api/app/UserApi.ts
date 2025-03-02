@@ -10,8 +10,8 @@ export class UserApi {
     return request<UserData[]>(RequestMethod.GET, 'user', cursor ? { cursor, size } : { size }, {})
   }
 
-  static putUser = (id: number, name: string) => {
-    return request(RequestMethod.PUT, 'user', {}, {id, name})
+  static putUser = (id: number, name: string, pageSize: number) => {
+    return request(RequestMethod.PUT, 'user', {}, {id, name, pageSize})
   }
 
   static deleteUser = (name: string, pageSize: number) => {
