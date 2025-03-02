@@ -92,8 +92,6 @@ public class UserServiceV2 {
         // ✅ TTL 유지하면서 캐시 저장
         redisTemplate.opsForValue().set(firstPageCacheKey, updatedUsers, currentTTL);
 
-        // ✅ 역 인덱스 저장
-        indexRedisTemplate.opsForSet().add("userCacheIndex::" + newUser.getId(), firstPageCacheKey);
     }
 
     // @Cacheable: 메서드 실행 결과를 캐시에 저장
