@@ -13,9 +13,9 @@ public class UserResponse {
     private final String name;
     private final Integer age;
 
-    @JsonCreator // ✅ Jackson이 역직렬화할 때 사용할 생성자 지정
+    @JsonCreator // @JsonCreator: Jackson이 역직렬화(JSON 데이터 → Java 객체)할 때 사용할 생성자 지정
     public UserResponse(
-            @JsonProperty("id") long id,
+            @JsonProperty("id") long id, // @JsonProperty: JSON의 필드와 Java 객체의 필드를 매핑
             @JsonProperty("name") String name,
             @JsonProperty("age") Integer age) {
         this.id = id;

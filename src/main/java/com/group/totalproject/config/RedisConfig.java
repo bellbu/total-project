@@ -14,41 +14,52 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.util.List;
 
 @Configuration // Bean을 정의하고 Spring 컨테이너에 등록(Bean을 수동으로 등록)
-public class RedisConfig { // Redis 서버 연결 설정
+public class RedisConfig { // Redis 서버 연결 설정하고 RedisTemplate을 Bean으로 등록
 
-    @Value("${spring.data.redis.host}") // application.yml의 host 설정 값을 host 변수에 할당
+    @Value("${spring.data.redis.host}") // application.yml의 host 설정 값("localhost")을 host 변수에 할당
     private String host;
 
-    @Value("${spring.data.redis.port}")
+    @Value("${spring.data.redis.port}")  // application.yml의 port 설정 값("6379")을 port 변수에 할당
     private int port;
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         // LettuceConnectionFactory(): Redis 연결을 관리하는 객체
-        // RedisStandaloneConfiguration: Redis 단일 서버에 대한 정보(host, port)를 설정
+        // RedisStandaloneConfiguration: 단일 Redis 서버에 연결하기 위해 정보(host, port)를 설정하는 객체
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port)); // Redis에 대한 정보를 설정하여 관리하는 객체 생성
     }
 
+    // RedisTemplate: Spring에서 Redis와 상호작용을 더 쉽게 만들어주는 템플릿 클래스
+    // 역할: Redis에 데이터 저장 및 조회 / 다양한 데이터 타입 지원 / (역)직렬화 처리 / 트랜잭션 및 파이프라인 지원
+    // RedisTemplate<String, List<UserResponse>>: Key는 String, Value는 List<UserResponse> 형식의 객체로 저장
     @Bean
     public RedisTemplate<String, List<UserResponse>> redisTemplate(LettuceConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, List<UserResponse>> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
-        // ✅ Key Serializer (문자열)
+        // Key 직렬화 방식 설정: StringRedisSerializer를 사용하여 Key를 문자열(String)로 변환하여 저장
+        // 직렬화 필요한 이유: Redis는 모든 데이터를 바이트(byte) 형태로 저장, Java의 객체(String, Integer, List 등)들을 직렬화 없이 바로 바이트로 저장할 수 없음
         template.setKeySerializer(new StringRedisSerializer());
 
-        // ✅ ObjectMapper 설정 (최신 버전 호환)
+        // ObjectMapper: Java 객체와 JSON 데이터간의 변환(직렬화/역직렬화) 해주는 Jackson 라이브러리
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules(); // ✅ LocalDate, LocalDateTime 자동 지원
+        objectMapper.findAndRegisterModules(); // findAndRegisterModules(): ObjectMapper는 기본 타입만 변환 가능하고 특수한 티입은 지원하지 않으므로 사용 가능한 모듈을 찾아 ObjectMapper에 등록
 
-        // ✅ GenericJackson2JsonRedisSerializer 사용 (더 안정적인 직렬화)
+        // Jackson2JsonRedisSerializer<T>: 특정 클래스 타입(T)에 대한 직렬화/역직렬화를 수행하는 직렬화 도구  ※ GenericJackson2JsonRedisSerializer: 다양한 타입을 저장할 때 적합
+        // constructCollectionType(List.class, UserResponse.class): Redis에서 데이터를 가져올 때 List<UserResponse> 타입으로 변환할 수 있도록 명시적으로 설정
         Jackson2JsonRedisSerializer<List<UserResponse>> serializer = new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, UserResponse.class));
 
+        // Value 직렬화 방식 설정: Value를 JSON으로 변환하여 저장하고 가져올 때 다시 List<UserResponse> 객체로 변환함(serializer)
         template.setValueSerializer(serializer);
+
+        // Redis Hash 자료구조를 사용할 때 Key의 직렬화 방식 설정: StringRedisSerializer를 사용하여 Key를 문자열(String)로 변환하여 저장
         template.setHashKeySerializer(new StringRedisSerializer());
+        // Redis Hash 자료구조를 사용할 때 Value의 직렬화 방식 설정: Value를 JSON으로 변환하여 저장하고 가져올 때 다시 List<UserResponse> 객체로 변환함(serializer)
         template.setHashValueSerializer(serializer);
 
+        // afterPropertiesSet(): RedisTemplate의 설정을 최종적으로 적용하는 메서드
         template.afterPropertiesSet();
+
         return template;
     }
 

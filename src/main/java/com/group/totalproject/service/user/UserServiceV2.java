@@ -31,7 +31,7 @@ public class UserServiceV2 {
     // 함수가 예외 없이 잘 끝났다면 commit;
     // 혹시라도 문제가 있다면 rollback; 단 IOException과 같은 Checked Exception은 롤백이 일어나지 않음
     @Transactional
-    public void saveUser(UserCreateRequest request, int pageSize) { // 유저 저장 기능
+    public void saveUser(UserCreateRequest request, int pageSize) {
 
         // 이름 검증: null 또는 빈 문자열일 경우 예외 처리
         if (request.getName() == null || request.getName().trim().isEmpty()) {
@@ -63,33 +63,32 @@ public class UserServiceV2 {
             throw new IllegalArgumentException("나이는 숫자만 입력 가능합니다.");
         }
 
-        // ✅ DB 등록 후 객체 생성
+        // DB 등록 후 newUser 객체 생성
         User newUser = userRepository.save(new User(request.getName(), request.getAge()));
 
-        // ✅ 첫 번째 페이지 캐시 키
+        // 첫 번째 페이지 캐시 키 정의
         String firstPageCacheKey = "getUsers::users:cursor:0:size:" + pageSize;
 
-        // ✅ 기존 캐시 조회
+        // 첫 번째 페이지 데이터를 Redis에서 조회
         List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(firstPageCacheKey);
 
-        // ✅ 조회된 캐시 데이터가 없으면 DB에만 저장 후 종료
+        // 조회된 캐시 데이터가 없으면 종료
         if (cachedUsers == null || cachedUsers.isEmpty()) {
             return;
         }
 
-        // ✅ 조회된 캐시 데이터가 있을 경우 새로운 회원을 맨 앞에 추가
-        List<UserResponse> updatedUsers = new ArrayList<>(cachedUsers);
-        updatedUsers.add(0, new UserResponse(newUser));
+        List<UserResponse> updatedUsers = new ArrayList<>(cachedUsers); // 조회된 캐시 데이터(cachedUsers)를 새 리스트(updatedUsers)에 복사
+        updatedUsers.add(0, new UserResponse(newUser)); // 새로운 사용자(newUser)를 리스트 맨 앞에 추가
 
-        // ✅ 기존 TTL 가져오기 (초 단위)
+        // 기존 만료시간(TTL, 초단위) 조회
         Long ttlInSeconds = redisTemplate.getExpire(firstPageCacheKey);
 
-        // ✅ Long → Duration 변환 (TTL 유지)
+        // 기존 만료시간 존재하면 기존 유지, 존재하지 않으면 5분 기본 설정
         Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                 ? Duration.ofSeconds(ttlInSeconds)
-                : Duration.ofMinutes(5); // 기본 TTL 5분
+                : Duration.ofMinutes(5); 
 
-        // ✅ TTL 유지하면서 캐시 저장
+        // 새로운 데이터로 Redis 캐시 갱신 - set(key, value, duration)
         redisTemplate.opsForValue().set(firstPageCacheKey, updatedUsers, currentTTL);
 
     }
@@ -97,20 +96,24 @@ public class UserServiceV2 {
     // @Cacheable: 메서드 실행 결과를 캐시에 저장
     // Cache Aside 전략으로 캐싱 적용 (cacheNames: 캐시 이름을 설정 / key: Redis에 저장할 Key의 이름을 설정(#변수: 매개변수 값) / cacheManager: RedisCacheConfig에서 사용할 cacheManager의 Bean 이름을 지정)
     @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: '0') + ':size:' + #size", cacheManager = "userCacheManager")
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // 읽기 전용 트랜잭션
     public List<UserResponse> getUsers(Long cursor, int size) {
-        Pageable pageable = PageRequest.of(0, size);  // ✅ Pageable 객체 생성
+        
+        // Pageable 객체 생성(JPA 페이징 처리 객체): 한 번에 몇 개의 데이터를 가져올지 (LIMIT ?) 설정하는 역할
+        Pageable pageable = PageRequest.of(0, size);  // PageRequest.of(0, size): 0 - 조회 페이지 번호, size - 페이지 당 로우 개수
+
         List<User> users;
 
-        if (cursor == null) {
+        if (cursor == null) { // 처음 조회(첫 페이지 조회)할 때 최신 회원 데이터 size개 가져옴
             users = userRepository.findTopByOrderByIdDesc(pageable);
         } else {
-            users = userRepository.findByIdLessThanOrderByIdDesc(cursor, pageable);
+            users = userRepository.findByIdLessThanOrderByIdDesc(cursor, pageable); // IdLessThan: id < cursor 조건을 의미
         }
 
-        return users.stream()
-                .map(UserResponse::new)
-                .collect(Collectors.toList());
+        // List<User> → List<UserResponse> 변환
+        return users.stream() // .stream(): 리스트를 스트림으로 변환(데이터를 하나씩 처리할 수 있는 형태로 변환)
+                .map(UserResponse::new) // .map(): 스트림의 각 요소를 다른 값으로 변환할 때 사용 / UserResponse::new -> user -> new UserResponse(user) 같은 의미
+                .collect(Collectors.toList()); // 변환된 스트림을 다시 리스트로 변환
 
         /*
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
