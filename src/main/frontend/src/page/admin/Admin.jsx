@@ -7,18 +7,12 @@ import { useNavigate } from 'react-router-dom'
 import * as Swal from '../../api/common/alert';
 
 const Container = styled.div`
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  min-width: 1440px;
 `
 
 const ContentsContainer = styled.div`
-  width: 100%;
-  height: calc(100% - 60px);
   box-sizing: border-box;
-  overflow-y: auto;
 `;
 
 const Admin = () => {

@@ -23,7 +23,7 @@ html, body, #root, #root>div {
 
 .container {
   width: 960px;
-  margin: 50px auto;
+  margin: 6.1vh auto;
   font-size: var(--font-size-main);
 }
 

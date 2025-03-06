@@ -7,14 +7,14 @@ import { useNavigate } from "react-router-dom";
 import * as Swal from '../../src/api/common/alert';
 
 const Container = styled.div`
-  width: calc(100% - 40px);
-  height: 60px;
+  width: calc(100% - 2.4vw);
+  height: 7vh;
   background-color: ${Colors.primaryColor};
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between; /* 양쪽 정렬 */
-  padding: 0 20px;
+  padding: 0 1.24vw;
 `;
 
 const LeftMenu = styled.div`

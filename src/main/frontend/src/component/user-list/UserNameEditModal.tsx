@@ -90,8 +90,8 @@ const UserNameEditModalContent = ({userId, currentName, onUpdate, onClose, pageS
           <p style={{fontSize: '15px', fontWeight: '400'}}>현재 이름</p>
           <p style={{fontSize: '15px', fontWeight: '600'}}>{currentName}</p>
         </div>
-        <FormInput title={'새 이름'} value={newName} onChange={setNewName} width={'230px'} fontSize={'16px'} />
-        <Button label={'수정'} onClick={edit} marginTop={'8px'}/>
+        <FormInput title={'새 이름'} value={newName} onChange={setNewName} width={'215px'} fontSize={'16px'} />
+        <Button label={'수정'} onClick={edit} marginTop={'8px 0 0 0'}/>
       </Content>
     </Container>
   );

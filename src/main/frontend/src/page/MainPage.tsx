@@ -16,7 +16,7 @@ const Container = styled.div`
 
 const ContentsContainer = styled.div`
   width: 100%;
-  height: calc(100% - 60px);
+  height: calc(100% - 6vh);
   box-sizing: border-box;
   overflow-y: auto;
 `;

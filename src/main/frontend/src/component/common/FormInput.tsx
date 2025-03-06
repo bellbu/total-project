@@ -42,7 +42,7 @@ interface Props {
 
 const FormInput = ({ title, value, onChange, width, fontSize }: Props) => {
   return (
-    <Container width={width ?? '30%'}>
+    <Container width={width ?? '27%'}>
       <Title fontSize={fontSize}>{title}</Title>
       <Input value={value} onChange={e => {
         onChange(e.target.value)

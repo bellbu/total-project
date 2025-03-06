@@ -122,7 +122,7 @@ const UserListPage = () => {
         </LoadingWrapper>
       )}
 
-      <div ref={observerTarget} style={{ height: '10px' }} />
+      <div ref={observerTarget} style={{ height: '100px' }} />
     </Container>
   );
 };
