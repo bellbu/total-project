@@ -3,17 +3,25 @@ package com.group.totalproject.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group.totalproject.dto.user.response.UserResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
 import java.util.List;
 
 @Configuration // Bean을 정의하고 Spring 컨테이너에 등록(Bean을 수동으로 등록)
+@EnableCaching // 캐싱 설정을 활성화(@Cacheable, @CachePut, @CacheEvict 같은 캐싱 관련 어노테이션을 사용할 수 있게 해줌)
 public class RedisConfig { // Redis 서버 연결 설정하고 RedisTemplate을 Bean으로 등록
 
     @Value("${spring.data.redis.host}") // application.yml의 host 설정 값("localhost")을 host 변수에 할당
@@ -22,6 +30,7 @@ public class RedisConfig { // Redis 서버 연결 설정하고 RedisTemplate을 
     @Value("${spring.data.redis.port}")  // application.yml의 port 설정 값("6379")을 port 변수에 할당
     private int port;
 
+    // Redis 연결 설정
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         // LettuceConnectionFactory(): Redis 연결을 관리하는 객체
@@ -61,6 +70,27 @@ public class RedisConfig { // Redis 서버 연결 설정하고 RedisTemplate을 
         template.afterPropertiesSet();
 
         return template;
+    }
+
+    // RedisCacheManager 설정 (캐시 사용)
+    @Bean
+    public CacheManager userCacheManager(RedisConnectionFactory redisConnectionFactory) { // Redis 연결을 위해 RedisConnectionFactory 주입 받음
+        RedisCacheConfiguration cacheConfig = RedisCacheConfiguration // RedisCacheConfiguration: Redis에 데이터를 저장하는 방식을 정의하는 객체
+                .defaultCacheConfig() // 기본 설정
+                .serializeKeysWith( // Redis의 Key 직렬화 설정
+                        RedisSerializationContext.SerializationPair.fromSerializer( // SerializationPair.fromSerializer(): 어떤 직렬화 방식을 사용할지 결정하는 메서드
+                                new StringRedisSerializer() // StringRedisSerializer: Key를 저장할 때 문자열(String) 형태로 저장
+                        )
+                ) // Redis의 Key 직렬화 설정
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                        // Jackson2JsonRedisSerializer: Java 객체를 JSON 문자열 형태로 직렬화해서 저장
+                        // Object.class: 다양한 데이터 타입을 저장할 수 있도록 설정
+                        new Jackson2JsonRedisSerializer<>(Object.class)))
+                .entryTtl(Duration.ofMinutes(5));
+
+        return RedisCacheManager.builder(redisConnectionFactory) // 주입받은 redisConnectionFactory를 사용하여 Redis 캐시 매니저를 생성
+                .cacheDefaults(cacheConfig) // 앞서 정의한 캐시 설정(cacheConfig) 적용
+                .build(); // 최종적으로 RedisCacheManager 객체를 생성하여 반환
     }
 
 }
