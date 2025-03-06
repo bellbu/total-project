@@ -52,7 +52,7 @@ const BookAdditionForm = () => {
       <Book />
       <Title>책 등록</Title>
       <FormInput title={'책 이름'} value={bookTitle} onChange={setBookTitle} />
-      <Button label={'저장'} onClick={handleClick} />
+      <Button label={'등록'} onClick={handleClick} />
     </Container>
   );
 };

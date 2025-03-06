@@ -55,7 +55,7 @@ const BookBorrowForm = () => {
       <Title>책 대출</Title>
       <FormInput title={'회원명'} value={name} onChange={setName} />
       <FormInput title={'책 이름'} value={bookTitle} onChange={setBookTitle} />
-      <Button label={'저장'} onClick={handleClick} />
+      <Button label={'대출'} onClick={handleClick} />
     </Container>
   );
 };

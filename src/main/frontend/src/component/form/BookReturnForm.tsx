@@ -56,7 +56,7 @@ const BookReturnForm = () => {
       <Title>책 반납</Title>
       <FormInput title={'회원명'} value={name} onChange={setName} />
       <FormInput title={'책 이름'} value={bookTitle} onChange={setBookTitle} />
-      <Button label={'저장'} onClick={handleClick} />
+      <Button label={'반납'} onClick={handleClick} />
     </Container>
   );
 };
