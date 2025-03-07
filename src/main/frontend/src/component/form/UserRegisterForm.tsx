@@ -37,10 +37,9 @@ const UserRegisterForm = () => {
         return;
     }
 
-    // 이름 유효성 검사: 영어(알파벳) 또는 한글만 허용
     const nameRegex = /^[a-zA-Z가-힣]+[0-9]*$/;
     if (!nameRegex.test(name)) {
-        Swal.alert('이름은 영어 또는 한글로 시작해야 하며, 숫자를 포함할 수 있습니다.\n단, 띄워쓰기는 사용할 수 없습니다.', '', 'warning');
+        Swal.alert('이름은 한글 또는 영어로 시작해야 하며, 숫자를 포함할 수 있습니다.\n단, 띄워쓰기는 사용할 수 없습니다.', '', 'warning');
         return;
     }
 

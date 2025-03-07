@@ -26,8 +26,8 @@ const JoinForm = ({ join }) => {
       e.preventDefault(); // submit 기본 동작 방지
 
       const form = e.target;
-      const email = form.email.value.trim();
-      const name = form.name.value.trim();
+      const email = form.email.value;
+      const name = form.name.value;
       const password = form.password.value;
       const emailVerified = form.emailVerified.value;
 
@@ -36,6 +36,12 @@ const JoinForm = ({ join }) => {
       if (!emailRegex.test(email)) {
             Swal.alert("올바른 이메일 형식을 입력해주세요.", "", "warning");
             return;
+      }
+
+      const nameRegex = /^[가-힣a-zA-Z]+$/;
+      if (!nameRegex.test(name)) {
+          Swal.alert("이름은 한글 또는 영문만 입력 가능하며, \n특수문자나 띄어쓰기는 사용할 수 없습니다.", "", "warning");
+          return;
       }
 
       // 빈값 유효성 검사

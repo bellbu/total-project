@@ -24,8 +24,8 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
       e.preventDefault(); // submit 기본 동작 방지
 
       const form = e.target;
-      const email = form.email.value.trim();
-      const name = form.name.value.trim();
+      const email = form.email.value;
+      const name = form.name.value;
       const password = form.password.value;
       const emailVerified = form.emailVerified.value;
 
@@ -33,6 +33,12 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
       if(!email || !name || !password) {
         Swal.alert('모든 필드를 입력해 주세요.', '', 'warning')
         return;
+      }
+
+      const nameRegex = /^[가-힣a-zA-Z]+$/;
+      if (!nameRegex.test(name)) {
+          Swal.alert("이름은 한글 또는 영문만 입력 가능하며, \n특수문자나 띄어쓰기는 사용할 수 없습니다.", "", "warning");
+          return;
       }
 
       // 권한 선택 검사

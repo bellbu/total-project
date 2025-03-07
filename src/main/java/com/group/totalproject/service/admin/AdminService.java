@@ -4,6 +4,7 @@ import com.group.totalproject.domain.admin.Admin;
 import com.group.totalproject.domain.admin.AdminRepository;
 import com.group.totalproject.domain.admin.Authority;
 import com.group.totalproject.dto.admin.request.AdminCreateRequest;
+import com.group.totalproject.dto.admin.request.AdminRequest;
 import com.group.totalproject.dto.admin.request.AdminUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class AdminService {
     }
 
     // 유효성 검사 메서드
-    private void validateRequest(AdminCreateRequest request) {
+    private void validateRequest(AdminRequest request) {
 
         if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             throw new IllegalArgumentException("이메일을 입력해 주세요.");
@@ -60,6 +61,10 @@ public class AdminService {
 
         if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("이름을 입력해 주세요.");
+        }
+
+        if (!request.getName().matches("^[가-힣a-zA-Z]+$")) {
+            throw new IllegalArgumentException("이름은 한글 또는 영문만 입력 가능하며, 특수문자나 띄어쓰기는 사용할 수 없습니다.");
         }
 
         if (request.getPassword() == null || request.getPassword().isEmpty()) {
@@ -77,29 +82,12 @@ public class AdminService {
     @Transactional
     public int updateAdmin(AdminUpdateRequest request) {
 
-        // 유효성 검사: 이메일 필수
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("이름을 입력해 주세요.");
-        }
+        // 유효성 검사
+        validateRequest(request);
 
         // 이메일이 admin@admin.com이면 수정 불가
         if("admin@admin.com".equals(request.getEmail())) {
             throw new IllegalArgumentException("해당 이메일의 관리자는 수정할 수 없습니다.");
-        }
-
-        // 유효성 검사: 이름 필수
-        if (request.getName() == null || request.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("이름을 입력해 주세요.");
-        }
-
-        // 유효성 검사: 비밀번호 필수
-        if (request.getPassword() == null || request.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("비밀번호를 입력해 주세요.");
-        }
-
-        // 유효성 검사: 권한 필수
-        if (request.getAuthorities() == null || request.getAuthorities().trim().isEmpty()) {
-            throw new IllegalArgumentException("권한을 입력해 주세요.");
         }
 
         // 관리자 찾기

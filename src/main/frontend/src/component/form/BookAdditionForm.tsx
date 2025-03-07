@@ -30,9 +30,15 @@ const BookAdditionForm = () => {
 
   const handleClick = () => {
 
-    if (!bookTitle.trim()) { // trim()을 사용하여 공백 제거
+    if (!bookTitle.trim()) {
         Swal.alert('책 이름을 입력해 주세요.', '', 'warning');
         return;
+    }
+
+    // XSS 및 SQL Injection 방어용 정규식 검사
+    if (!/^[^<>]*$/.test(bookTitle)) {
+      Swal.alert('책 이름에 <, > 문자를 사용할 수 없습니다.', '', 'warning');
+      return;
     }
 
     BookApi.postBook(bookTitle)

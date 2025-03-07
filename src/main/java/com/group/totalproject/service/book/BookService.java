@@ -39,6 +39,10 @@ public class BookService {
             throw new IllegalArgumentException("책 이름은 필수입니다.");
         }
 
+        if (!request.getName().matches("^[^<>]*$")) {
+            throw new IllegalArgumentException("책 이름에 <, > 문자를 사용할 수 없습니다.");
+        }
+
         if (bookRepository.existsByName(request.getName())){
             throw new IllegalArgumentException("이미 존재하는 책 이름입니다. \n다른 이름을 사용해주세요.");
         }

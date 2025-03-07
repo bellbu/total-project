@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class AdminUpdateRequest {
+public class AdminUpdateRequest implements AdminRequest {
 
     // private long id;
     private String email; // 이메일,
