@@ -44,7 +44,7 @@ public class JwtTokenProvider {
                 .header() // JWT 헤더 설정
                 .add("type", JwtConstants.TOKEN_TYPE)  // type: JWT
                 .and()
-                .expiration(new Date(System.currentTimeMillis() + 864000000))  // 토큰 만료 시간: 10일
+                .expiration(new Date(System.currentTimeMillis() + 7200000))  // 토큰 만료 시간: 2시간
                 .claim("adminNo", "" + adminNo) // 사용자 번호를 클레임(페이로드의 한 조각)에 추가
                 .claim("email", email) // 사용자 이름을 클레임(페이로드의 한 조각)에 추가
                 .claim("authorities", authorities) // 권한 정보를 클레임(페이로드의 한 조각)에 추가
