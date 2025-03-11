@@ -97,7 +97,7 @@ public class UserServiceV2 {
 
     // @Cacheable: 메서드 실행 결과를 캐시에 저장
     // Cache Aside 전략으로 캐싱 적용 (cacheNames: 캐시 이름을 설정 / key: Redis에 저장할 Key의 이름을 설정(#변수: 매개변수 값) / cacheManager: RedisCacheConfig에서 사용할 cacheManager의 Bean 이름을 지정)
-    @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: '0') + ':size:' + #size", cacheManager = "userCacheManager")
+    // @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: '0') + ':size:' + #size", cacheManager = "userCacheManager")
     @Transactional(readOnly = true) // 읽기 전용 트랜잭션
     public List<UserResponse> getUsers(Long cursor, int size) {
 
