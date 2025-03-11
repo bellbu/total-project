@@ -1,5 +1,6 @@
 package com.group.totalproject.security.jwt.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group.totalproject.security.custom.CustomAdmin;
 import com.group.totalproject.security.jwt.constants.JwtConstants;
 import com.group.totalproject.security.jwt.provider.JwtTokenProvider;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +51,24 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
      * */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        try {
+            // JSON 요청 본문을 읽어서 객체로 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, String> credentials = objectMapper.readValue(request.getInputStream(), Map.class);
+
+            String email = credentials.get("email");
+            String password = credentials.get("password");
+
+            log.info("email : " + email);
+            log.info("password : " + password);
+
+            // 인증 객체 생성 및 인증 시도
+            Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
+            return authenticationManager.authenticate(authentication);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse authentication request", e);
+        }
+        /*
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
@@ -58,10 +78,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 이메일과 비밀번호로 사용자 인증 객체 생성
         Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
 
-        /**
+        *//**
          * authenticationManager.authenticate()가 CustomAdminDetailService의 loadUserByUsername 메서드를 호출하여 데이터베이스에서 사용자 조회
          * 사용자 인증 시도: 성공 시 - Authentication 객체 반환 / 실패 시 - 예외 던짐
-         */
+         *//*
         authentication = authenticationManager.authenticate(authentication); // authenticationManager: 데이터베이스에서 사용자 조회하여 계정 상태 확인 후 인증
         log.info("authentication : " + authentication);
         log.info("인증 여부 : " + authentication.isAuthenticated());
@@ -73,6 +93,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
 
         return authentication;
+        */
     }
 
     /**
