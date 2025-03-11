@@ -100,7 +100,6 @@ public class UserServiceV2 {
     @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: '0') + ':size:' + #size", cacheManager = "userCacheManager")
     @Transactional(readOnly = true) // 읽기 전용 트랜잭션
     public List<UserResponse> getUsers(Long cursor, int size) {
-/*
 
         // Pageable 객체 생성(JPA 페이징 처리 객체): 한 번에 몇 개의 데이터를 가져올지 (LIMIT ?) 설정하는 역할
         Pageable pageable = PageRequest.of(0, size);  // PageRequest.of(0, size): 0 - 조회 페이지 번호, size - 페이지 당 로우 개수
@@ -117,9 +116,8 @@ public class UserServiceV2 {
         return users.stream() // .stream(): 리스트를 스트림으로 변환(데이터를 하나씩 처리할 수 있는 형태로 변환)
                 .map(UserResponse::new) // .map(): 스트림의 각 요소를 다른 값으로 변환할 때 사용 / UserResponse::new -> user -> new UserResponse(user) 같은 의미
                 .collect(Collectors.toList()); // 변환된 스트림을 다시 리스트로 변환
-*/
 
-
+       /*
         // OFFSET 기반 페이징(Pageable) 적용
         Pageable pageable = PageRequest.of(cursor.intValue(), size, Sort.by(Sort.Direction.DESC, "id"));
 
@@ -130,7 +128,7 @@ public class UserServiceV2 {
         return usersPage.getContent().stream()
                 .map(UserResponse::new)
                 .collect(Collectors.toList());
-        
+        */
 
         /*
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
