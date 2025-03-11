@@ -40,10 +40,9 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: "jdbc:mysql://localhost/library" 
-    username: "root"  
-    password: "0000"
-    driver-class-name: com.mysql.cj.jdbc.Driver  
+    url: "jdbc:mysql://totalproject-db.cvqk8wwquqiy.ap-northeast-2.rds.amazonaws.com:3306/mydb" 
+    username: "admin"  
+    password: "password"
   jpa:
     hibernate:
       ddl-auto: update 
@@ -54,7 +53,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect 
   data:
     redis:
-      host: instagram-cache-server.vzvxyg.ng.0001.apn2.cache.amazonaws.com
+      host: localhost
       port: 6379
 
 logging:
