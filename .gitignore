@@ -1,4 +1,5 @@
 build/
+out/
 .gradle/
 .idea/
 **/src/main/resources/application.yml
