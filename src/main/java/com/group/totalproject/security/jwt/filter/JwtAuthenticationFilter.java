@@ -52,9 +52,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
-            // JSON 요청 본문을 읽어서 객체로 변환
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> credentials = objectMapper.readValue(request.getInputStream(), Map.class);
+            ObjectMapper objectMapper = new ObjectMapper(); // ObjectMapper: JSON ↔ Java 객체 간 변환을 수행
+            // JSON 요청 본문을 읽어서 자바 객체 Map 타입으로 변환
+            Map<String, String> credentials = objectMapper.readValue(request.getInputStream(), Map.class); // request.getInputStream(): 요청 바디의 JSON 데이터를 읽음 / Map.class: Map 타입으로 변환
 
             String email = credentials.get("email");
             String password = credentials.get("password");
@@ -68,6 +68,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse authentication request", e);
         }
+
         /*
         String email = request.getParameter("email");
         String password = request.getParameter("password");
@@ -77,11 +78,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // 이메일과 비밀번호로 사용자 인증 객체 생성
         Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
+        */
 
-        *//**
+        /**
          * authenticationManager.authenticate()가 CustomAdminDetailService의 loadUserByUsername 메서드를 호출하여 데이터베이스에서 사용자 조회
          * 사용자 인증 시도: 성공 시 - Authentication 객체 반환 / 실패 시 - 예외 던짐
-         *//*
+         */
+        /*
         authentication = authenticationManager.authenticate(authentication); // authenticationManager: 데이터베이스에서 사용자 조회하여 계정 상태 확인 후 인증
         log.info("authentication : " + authentication);
         log.info("인증 여부 : " + authentication.isAuthenticated());
