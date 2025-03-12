@@ -15,7 +15,7 @@
 - Spring Security + JWT를 활용한 로그인 및 인증 시스템
 - 권한 없는 사용자의 접근 제한
 - 회원 목록 조회는 관리자 권한 필요
-- Access Token 만료 기간 10일 설정
+- Access Token 만료 기간 2시간 설정
 
 ### **3. 캐싱 & 성능 최적화 (Redis + Cursor-based Pagination)**
 
