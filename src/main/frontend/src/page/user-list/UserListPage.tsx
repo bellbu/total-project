@@ -36,15 +36,16 @@ const UserListPage = () => {
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 회원 조회 O
       const data = await UserApi.getUser(cursor, PAGE_SIZE); // 현재 페이지 값으로 회원 조회 api 호출
+      console.log("data",data);
 
       setUserList(prev => [...prev, ...data]); // prev(기존의 userList)와 data(새로운 회원 목록) 배열 병합
 
       if(data.length > 0) {
-          // 🔄 마지막 요소의 ID를 cursor로 설정
+          // 마지막 요소의 ID를 cursor로 설정
           setCursor(data[data.length -1].id);
       }
 
-      // 🔥 서버에서 더 이상 데이터가 없을 경우만 hasMore을 false로 설정
+      // 서버에서 더 이상 데이터가 없을 경우만 hasMore을 false로 설정
       setHasMore(data.length > 0);
     } catch (error) {
       console.error('Failed to load users:', error);

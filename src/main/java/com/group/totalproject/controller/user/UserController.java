@@ -33,7 +33,7 @@ public class UserController { // Controller: API와 HTTP 담당
     @GetMapping("/user") // 목록보기
     @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 'ROLE_' 접두사를 포함한 전체 권한명 사용
     public ResponseEntity<List<UserResponse>> getUsers(
-        @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "500") int size
+        @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "100") int size
     ) {
         return ResponseEntity.ok(userService.getUsers(cursor, size));
 
