@@ -39,6 +39,9 @@ const LoginContextProvider = ({children}) => {
     // 이메일 저장 여부
     // const [rememberEmail, setRememberEmail] = useState();
 
+    // JWT 만료시간
+    const [jwtExpirationTime, setJwtExpirationTime] = useState(0); // JWT 만료시간 추가
+
     // 로그인 체크 로딩 상태 (true: 로딩 중 / false: 로딩 완료)
     const [isLoading, setIsLoading] = useState(true);
     /*-------------------------------------------------------------- */
@@ -202,10 +205,23 @@ const LoginContextProvider = ({children}) => {
         loginCheck();
     }, [loginCheck]);
 
+    // JWT 만료시간 체크
+    useEffect(() => {
+        const accessToken = Cookies.get("accessToken");
+        console.log("accessToken",accessToken);
+        if (accessToken) {
+          // JWT 토큰의 만료시간 설정 (accessToken의 payload에서 추출)
+          const payload = JSON.parse(atob(accessToken.split(".")[1])); // JWT payload에서 만료시간 추출
+          setJwtExpirationTime(payload.exp * 1000); // 만료시간을 ms 단위로 설정
+        }
+    }, [isLogin]);
+
+
+
     return (
         // LoginContext.Provider를 사용해 데이터와 함수를 Context에 전달
         // LoginContextProvider의 자식 컴포넌트들이 Context 값을 사용할 수 있음
-        <LoginContext.Provider value={{ isLogin, adminInfo, authorities, login, loginCheck, logout, isLoading, setAdminInfo }}>
+        <LoginContext.Provider value={{ isLogin, adminInfo, authorities, login, loginCheck, logout, isLoading, setAdminInfo, jwtExpirationTime }}>
             {children}  
         </LoginContext.Provider>
     )

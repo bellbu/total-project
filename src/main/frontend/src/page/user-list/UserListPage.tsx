@@ -36,7 +36,6 @@ const UserListPage = () => {
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 회원 조회 O
       const data = await UserApi.getUser(cursor, PAGE_SIZE); // 현재 페이지 값으로 회원 조회 api 호출
-      console.log("data",data);
 
       setUserList(prev => [...prev, ...data]); // prev(기존의 userList)와 data(새로운 회원 목록) 배열 병합
 
