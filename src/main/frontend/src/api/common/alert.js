@@ -48,6 +48,14 @@ export const alert = (title, text, icon, callback) => {
 
 // confirm
 export const confirm = (title, text, icon, callback) => {
+    // 기본 확인 버튼
+    let confirmText = "확인";
+
+    // 연장 확인 버튼
+    if (title === "1분 남았습니다!" && text.includes("자동 로그아웃")) {
+        confirmText = "연장";
+    }
+
     MySwal.fire({
         title: title,
         text: text,
@@ -56,7 +64,7 @@ export const confirm = (title, text, icon, callback) => {
         cancelButtonColor: "#d33",
         cancelButtonText: "취소",
         confirmButtonColor: "#3085d6",
-        confirmButtonText: "확인",
+        confirmButtonText: confirmText,
         customClass: {
             title: 'swal2-title',
             htmlContainer: 'swal2-html-container',
