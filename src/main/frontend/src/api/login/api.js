@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-// axios 객체 생성
-const api = axios.create();
+const api = axios.create({
+    withCredentials: true, // HttpOnly 쿠키 포함
+});
 
 export default api;

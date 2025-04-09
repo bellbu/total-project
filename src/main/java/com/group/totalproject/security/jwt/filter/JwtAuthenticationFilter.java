@@ -120,10 +120,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // JwtTokenProvider를 사용해 사용자 정보를 포함한 JWT를 생성
         String jwt = jwtTokenProvider.createToken(adminNo, email, authorities);
+        // Refresh Token 생성
+        String refreshToken = jwtTokenProvider.createRefreshToken(adminNo, email);
         
         // 응답 설정
-        response.addHeader(JwtConstants.TOKEN_HEADER, JwtConstants.TOKEN_PREFIX+ jwt); // 생성한 JWT를 HTTP 응답 헤더(Authorization)에 추가
-        response.setStatus(200); // HTTP 응답 상태를 200 (OK)로 설정
+        // Access Token 헤더에 담기
+        response.setHeader(JwtConstants.TOKEN_HEADER, JwtConstants.TOKEN_PREFIX+ jwt); // 생성한 JWT를 HTTP 응답 헤더(Authorization)에 추가
+        // Refresh Token HttpOnly 쿠키로 설정
+        response.addHeader("Set-Cookie", "refreshToken=" + refreshToken +
+                "; HttpOnly; Path=/; Max-Age=600; SameSite=None; Secure");
+
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 
 }

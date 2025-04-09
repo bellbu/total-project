@@ -73,6 +73,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers(PUBLIC_URLS).permitAll()
+                .requestMatchers(HttpMethod.POST, "/token/refresh-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/user").hasAnyRole("USER", "ADMIN") // 회원 등록은 ADMIN(관리자), USER(부관리자) 모두 가능
                 .requestMatchers("/user/**").hasRole("ADMIN") // 회원 조회/수정/삭제는 ADMIN(관리자)만 허용
                 .requestMatchers(HttpMethod.POST, "/admin").permitAll() // 관리자 가입은 모두 허용
