@@ -68,7 +68,7 @@ const TextButton = styled.button<{ isActive?: boolean }>`
 
 const TimeDisplay = styled.div`
   background-color: #fffbe6;
-  color: firebrick;
+  color: #581717;
   opacity: 0.8;
   padding: 4px 10px;
   border-radius: 6px;
@@ -177,7 +177,7 @@ const MainTopBar = ({ setTab, tab }: Props) => {
 
             // Base64 → UTF-8 문자열로 복원  ex) jsonPayload: {"exp":1744204137,"adminNo":"1","email":"admin@admin.com","authorities":["ROLE_ADMIN"]}
             const jsonPayload = decodeURIComponent( // decodeURIComponent(): 마지막으로 퍼센트 인코딩된 문자열을 정상적인 UTF-8 문자열로 변환
-                atob(base64) // base64 -> 바이너리 문자열  ex) "eyJleHAiOjE2..." → {"exp":168...}
+                atob(base64) // atob(): Base64 인코딩된 문자열 디코딩 ex) "eyJleHAiOjE2..." → {"exp":168...}
                 .split('') // 한 글자씩 쪼개기
                 .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)) // 각 글자 → 16진수 → 퍼센트 인코딩
                 .join('')

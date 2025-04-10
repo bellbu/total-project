@@ -32,31 +32,38 @@ public class TokenController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<?> refreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken, // @CookieValue: 요청 헤더 중 Cookie에서 refreshToken이라는 이름의 쿠키 값을 꺼냄
+                                          HttpServletResponse response) {
 
+        // refreshToken 유효성 검증
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 Refresh Token입니다.");
         }
 
+        // refreshToken 해석하여 인증 객체 생성
         UsernamePasswordAuthenticationToken authentication = jwtTokenProvider.getAuthentication(refreshToken);
+
         if (authentication == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 실패");
         }
 
+        // 인증된 사용자 정보 가져오기
         CustomAdmin customAdmin = (CustomAdmin) authentication.getPrincipal();
         Admin admin = customAdmin.getAdmin();
 
+        // 새 accessToken 발급
         String newAccessToken = jwtTokenProvider.createToken(
                 Math.toIntExact(admin.getId()),
                 admin.getEmail(),
                 admin.getAuthorities().stream().map(Enum::name).collect(Collectors.toList())
         );
 
-        // refreshToken도 재발급 (기존 방식처럼 쿠키에 설정)
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(Math.toIntExact(admin.getId()), admin.getEmail()); // 새로 생성
+        // 새 refreshToken도 발급해서 쿠키에 설정
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(Math.toIntExact(admin.getId()), admin.getEmail());
         response.addHeader("Set-Cookie", "refreshToken=" + newRefreshToken +
                 "; HttpOnly; Path=/; Max-Age=600; SameSite=None; Secure");
 
+        // 새로 발급된 accessToken 응답 헤더와 본문에 전달
         return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_PREFIX + newAccessToken)
                 .body(newAccessToken);
     }

@@ -210,8 +210,8 @@ const LoginContextProvider = ({children}) => {
         const accessToken = Cookies.get("accessToken");
         if (accessToken) {
           // JWT 토큰의 만료시간 설정 (accessToken의 payload에서 추출)
-          const payload = JSON.parse(atob(accessToken.split(".")[1])); // JWT payload에서 만료시간 추출
-          setJwtExpirationTime(payload.exp * 1000); // 만료시간을 ms 단위로 설정
+          const payload = JSON.parse(atob(accessToken.split(".")[1])); // JSON.parse(): 문자열 → JS 객체, atob(): Base64 인코딩된 문자열 디코딩
+          setJwtExpirationTime(payload.exp * 1000); // 초 → 밀리초 (Date 생성용)
         }
     }, [isLogin]);
 

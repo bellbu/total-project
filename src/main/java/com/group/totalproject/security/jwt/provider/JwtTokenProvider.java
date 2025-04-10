@@ -36,7 +36,7 @@ public class JwtTokenProvider {
     private final JwtProps jwtProps; // JWT 설정 정보(비밀 키)를 담은 객체
     private final AdminRepository adminRepository;
 
-    // 토큰 생성
+    // accessToken 생성
     public String createToken(int adminNo, String email, List<String> authorities) {
 
         String jwt = Jwts.builder() // JWT 생성에 필요한 정보를 빌드
@@ -55,7 +55,7 @@ public class JwtTokenProvider {
         return jwt;
     }
 
-    // refresh token 생성
+    // refreshToken 생성
     public String createRefreshToken(int adminNo, String email) {
         return Jwts.builder()
                 .signWith(getShaKey(), Jwts.SIG.HS512)

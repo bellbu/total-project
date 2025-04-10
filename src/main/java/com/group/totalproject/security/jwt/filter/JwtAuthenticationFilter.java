@@ -130,6 +130,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.addHeader("Set-Cookie", "refreshToken=" + refreshToken +
                 "; HttpOnly; Path=/; Max-Age=600; SameSite=None; Secure");
 
+        // HTTP 상태코드 200 OK 응답 설정
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
