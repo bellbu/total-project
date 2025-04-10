@@ -5,19 +5,29 @@ import com.group.totalproject.dto.user.request.UserDeleteRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
 import com.group.totalproject.service.user.UserServiceV2;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController // @RestController: 1.API 진입지점 만들어 줌 / 2.UserController 클래스를 스프링 빈으로 등록시켜 줌 / 3.@Controller + @ResponseBody(json 형태로 데이터를 반환해 줌)
 public class UserController { // Controller: API와 HTTP 담당
 
     private final UserServiceV2 userService;
+    private final CacheManager cacheManager;
+    private final StringRedisTemplate redisTemplate;
 
-    public UserController(UserServiceV2 userService) {  // UserController가 JdbcTemplate에 의존
+    public UserController(UserServiceV2 userService, CacheManager cacheManager, StringRedisTemplate redisTemplate) {  // UserController가 JdbcTemplate에 의존
         this.userService = userService;
+        this.cacheManager = cacheManager;
+        this.redisTemplate = redisTemplate;
     }
 
     @PostMapping("/user") // 등록
@@ -35,7 +45,38 @@ public class UserController { // Controller: API와 HTTP 담당
     public ResponseEntity<List<UserResponse>> getUsers(
         @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "100") int size
     ) {
-        return ResponseEntity.ok(userService.getUsers(cursor, size));
+        long start = System.currentTimeMillis();
+
+        // === 캐시 키 생성 ===
+        String key = "users:cursor:" + (cursor != null ? cursor : "0") + ":size:" + size;
+
+        // === 캐시 히트 여부 판단 ===
+        boolean isHit = false;
+        Cache cache = cacheManager.getCache("getUsers");
+        if (cache != null && cache.get(key) != null) {  // 여기서 key만 전달해야 함. cacheName은 이미 지정돼 있음.
+            isHit = true;
+        }
+
+        List<UserResponse> users = userService.getUsers(cursor, size);
+
+        long end = System.currentTimeMillis();
+        long duration = end - start;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Cache", isHit ? "HIT" : "MISS"); // ← 캐시 히트/미스 헤더
+        headers.add("X-Response-Time", duration + "ms"); // ← 응답 시간 헤더
+
+        // === TTL 확인 (캐시 히트 시에만) ===
+        if (isHit) {
+            Long ttl = redisTemplate.getExpire("getUsers::" + key, TimeUnit.SECONDS);
+            headers.add("X-TTL", ttl != null && ttl > 0 ? ttl + "s" : "No TTL");
+        }
+
+        System.out.println("headers!!!!!!!!!!!!!!!!!!!!!: " + headers);
+
+        return new ResponseEntity<>(users, headers, HttpStatus.OK);
+
+        // return ResponseEntity.ok(userService.getUsers(cursor, size));
 
         /* 첫번째
         List<UserResponse> responses = new ArrayList<>();
