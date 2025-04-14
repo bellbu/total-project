@@ -15,7 +15,8 @@ export const request = async <T>(
   uri: string,
   params: any,
   data: any,
-): Promise<T> => {
+  responseType: 'data' | 'full' = 'data' // ✅ 추가
+): Promise<any> => {
   try {
     // JWT 토큰을 쿠키에서 가져옵니다
     const token = document.cookie
@@ -34,7 +35,9 @@ export const request = async <T>(
       }
     })
 
-    return response.data
+    // ✅ full이면 전체 response, 아니면 data만 반환
+    return responseType === 'full' ? response : response.data;
+
   } catch (error: any) {
     console.log("error : ", error);
 

@@ -41,38 +41,41 @@ public class UserController { // Controller: API와 HTTP 담당
     }
 
     @GetMapping("/user") // 목록보기
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // 'ROLE_' 접두사를 포함한 전체 권한명 사용
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // @PreAuthorize("hasAuthority('ROLE_ADMIN')"): Spring Security의 어노테이션, ROLE_ADMIN 권한이 있어야 접근 가능.
     public ResponseEntity<List<UserResponse>> getUsers(
         @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "100") int size
     ) {
+        // API 조회 시작 시간
         long start = System.currentTimeMillis();
 
-        // === 캐시 키 생성 ===
+        // 캐시 히트 여부 조회를 위한 캐시의 키 생성
         String key = "users:cursor:" + (cursor != null ? cursor : "0") + ":size:" + size;
 
-        // === 캐시 히트 여부 판단 ===
+        // 캐시 히트 여부 판단
         boolean isHit = false;
-        Cache cache = cacheManager.getCache("getUsers");
-        if (cache != null && cache.get(key) != null) {  // 여기서 key만 전달해야 함. cacheName은 이미 지정돼 있음.
+        Cache cache = cacheManager.getCache("getUsers"); // "getUsers" 캐시를 가져옴
+        if (cache != null && cache.get(key) != null) {  // 캐시에 해당 키가 존재하는지 확인
             isHit = true;
         }
 
         List<UserResponse> users = userService.getUsers(cursor, size);
 
+        // API 조회 끝 시간
         long end = System.currentTimeMillis();
+
+        // API 처리에 걸린 시간 계산
         long duration = end - start;
 
+        // 응답 헤더 설정
         HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Cache", isHit ? "HIT" : "MISS"); // ← 캐시 히트/미스 헤더
-        headers.add("X-Response-Time", duration + "ms"); // ← 응답 시간 헤더
+        headers.add("X-Cache", isHit ? "HIT" : "MISS"); // 캐시 히트/미스 헤더
+        headers.add("X-Response-Time", duration + "ms"); // API 응답 시간 헤더
 
         // === TTL 확인 (캐시 히트 시에만) ===
         if (isHit) {
-            Long ttl = redisTemplate.getExpire("getUsers::" + key, TimeUnit.SECONDS);
-            headers.add("X-TTL", ttl != null && ttl > 0 ? ttl + "s" : "No TTL");
+            Long ttl = redisTemplate.getExpire("getUsers::" + key, TimeUnit.SECONDS); // getExpire: 레디스에서 특정 키의 TTL을 가져옴, TimeUnit.SECONDS: 반환되는 TTL을 초 단위로 설정
+            headers.add("X-TTL", ttl != null && ttl > 0 ? ttl.toString() : "No TTL");
         }
-
-        System.out.println("headers!!!!!!!!!!!!!!!!!!!!!: " + headers);
 
         return new ResponseEntity<>(users, headers, HttpStatus.OK);
 

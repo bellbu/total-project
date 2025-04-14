@@ -22,6 +22,28 @@ const LoadingWrapper = styled.div`
   height: 100px;
 `;
 
+// ✅ 캐시 상태에 따라 색상 변경하도록 수정
+const CacheStatusBadge = styled.div<{ visible: boolean; type: 'HIT' | 'MISS' }>`
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  padding: 14px 24px;
+  background-color: ${(props) => (props.type === 'HIT' ? '#28a745' : 'firebrick')};
+  color: #fff;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 9999;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  opacity: ${(props) => (props.visible ? 1 : 0)};
+  transform: ${(props) => (props.visible ? 'translateY(0)' : 'translateY(10px)')};
+  transition: all 0.4s ease;
+`;
+
 const UserListPage = () => {
   const [userList, setUserList] = useState<UserData[]>([]); // userList: 조회 회원 목록 저장
   const [totalCount, setTotalCount] = useState(0); // totalCount: 전체 회원 수 저장
@@ -29,23 +51,89 @@ const UserListPage = () => {
   const [hasMore, setHasMore] = useState(true); // 추가 테이터 조회 여부
   const [isLoading, setIsLoading] = useState(false); // 로딩 표시 여부
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [cacheStatus, setCacheStatus] = useState<{ type: 'HIT' | 'MISS', message: string, speed: string } | null>(null); // ✅ 캐시 상태 관리
+  const [ttlSeconds, setTtlSeconds] = useState<number | null>(null); // ✅ TTL 관리
+  const [cacheVisible, setCacheVisible] = useState(false); // ✅ 캐시 상태 배지 표시 여부
+  const cacheTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (ttlSeconds === null || ttlSeconds <= 0) return;
+
+    const interval = setInterval(() => {
+        setTtlSeconds(prev => {
+          if (prev !== null) {
+            if (prev <= 1) {
+              clearInterval(interval);
+              setCacheStatus({ type: 'MISS', message: '캐시 만료', speed: '-' });
+              return 0;
+            }
+            return prev - 1;
+          }
+          return null;
+        });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [ttlSeconds]);
 
   const loadUsers = useCallback(async () => {
     if (!hasMore || isLoading) return; // 로드할 데이터가 없거나 데이터 로딩 중인 경우 => 회원 조회 X
 
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 회원 조회 O
-      const data = await UserApi.getUser(cursor, PAGE_SIZE); // 현재 페이지 값으로 회원 조회 api 호출
+
+      const response = await UserApi.getUser(cursor, PAGE_SIZE); // ✅ response 받기
+      const data = response.data;
+      const ttlHeader = response.headers['x-ttl']; // ✅ 서버에서 TTL 값 가져오기 (헤더 키 이름 확인 필요)
+      const cacheHeader = response.headers['x-cache'];
+      const responseTime = response.headers['x-response-time']; // ✅ 조회 속도 측정
+
+      // ✅ TTL 계산 및 표시용 예시 (초 단위라고 가정)
+        // 배지 잠시 숨기고 다시 표시하도록 처리
+        setCacheVisible(false);
+
+        setTimeout(() => {
+          if (cacheHeader === 'HIT') {
+            const ttl = parseInt(ttlHeader, 10);
+            setTtlSeconds(ttl);
+            setCacheStatus({
+              type: 'HIT',
+              message: `✅ 캐시 HIT `,
+              speed: responseTime
+            });
+          } else {
+            setCacheStatus({
+              type: 'MISS',
+              message: `❌ 캐시 MISS `,
+              speed: responseTime
+            });
+          }
+
+          setCacheVisible(true);
+
+         // 👉 기존 타이머가 있으면 제거
+          if (cacheTimeoutRef.current) {
+            clearTimeout(cacheTimeoutRef.current);
+          }
+
+          // 👉 새로운 타이머 설정
+          cacheTimeoutRef.current = setTimeout(() => {
+            setCacheVisible(false);
+            // setCacheStatus(null);
+            cacheTimeoutRef.current = null;
+          }, 4000);
+        }, 200); // 바로 실행되게 0ms 딜레이
 
       setUserList(prev => [...prev, ...data]); // prev(기존의 userList)와 data(새로운 회원 목록) 배열 병합
 
       if(data.length > 0) {
           // 마지막 요소의 ID를 cursor로 설정
           setCursor(data[data.length -1].id);
+          setHasMore(true);  // ✅ 명시적으로 true 설정
+      } else {
+          setHasMore(false);
       }
 
-      // 서버에서 더 이상 데이터가 없을 경우만 hasMore을 false로 설정
-      setHasMore(data.length > 0);
     } catch (error) {
       console.error('Failed to load users:', error);
       Swal.alert(error, '', 'error');
@@ -114,6 +202,12 @@ const UserListPage = () => {
           pageSize={PAGE_SIZE}
         />
       ))}
+
+      {/* 캐시 상태 배지 */}
+        <CacheStatusBadge visible={cacheVisible} type={cacheStatus?.type || 'MISS'}>
+          {cacheStatus ? `${cacheStatus.message} - 조회 속도: ${cacheStatus.speed}${cacheStatus.type === 'HIT' && ttlSeconds !== null ? `, TTL: ${ttlSeconds}초` : ''}` : ''}
+        </CacheStatusBadge>
+
 
       {/* 로딩 중일 때 Lottie 애니메이션 표시 */}
       {isLoading && (
