@@ -85,10 +85,10 @@ public class UserServiceV2 {
         // 기존 만료시간(TTL, 초단위) 조회
         Long ttlInSeconds = redisTemplate.getExpire(firstPageCacheKey);
 
-        // 기존 만료시간 존재하면 기존 유지, 존재하지 않으면 5분 기본 설정
+        // 기존 만료시간 존재하면 기존 유지, 존재하지 않으면 3분 기본 설정
         Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                 ? Duration.ofSeconds(ttlInSeconds)
-                : Duration.ofMinutes(5); 
+                : Duration.ofMinutes(3);
 
         // 새로운 데이터로 Redis 캐시 갱신 - set(key, value, duration)
         redisTemplate.opsForValue().set(firstPageCacheKey, updatedUsers, currentTTL);
@@ -101,6 +101,7 @@ public class UserServiceV2 {
     @Transactional(readOnly = true) // 읽기 전용 트랜잭션
     public List<UserResponse> getUsers(Long cursor, int size) {
 
+        // CURSOR 기반 페이징 적용
         // Pageable 객체 생성(JPA 페이징 처리 객체): 한 번에 몇 개의 데이터를 가져올지 (LIMIT ?) 설정하는 역할
         Pageable pageable = PageRequest.of(0, size);  // PageRequest.of(0, size): 0 - 조회 페이지 번호, size - 페이지 당 로우 개수
 
@@ -114,31 +115,21 @@ public class UserServiceV2 {
 
         // List<User> → List<UserResponse> 변환
         return users.stream() // .stream(): 리스트를 스트림으로 변환(데이터를 하나씩 처리할 수 있는 형태로 변환)
-                .map(UserResponse::new) // .map(): 스트림의 각 요소를 다른 값으로 변환할 때 사용 / UserResponse::new -> user -> new UserResponse(user) 같은 의미
+                .map(UserResponse::new) // .map(): 스트림의 각 요소를 다른 값으로 변환할 때 사용 / UserResponse::new 는 user -> new UserResponse(user)와 같은 의미
                 .collect(Collectors.toList()); // 변환된 스트림을 다시 리스트로 변환
 
-       /*
-        // OFFSET 기반 페이징(Pageable) 적용
-        Pageable pageable = PageRequest.of(cursor.intValue(), size, Sort.by(Sort.Direction.DESC, "id"));
+/*
+        // OFFSET 기반 페이징 적용
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
-        // 모든 사용자 조회 (OFFSET 기반 페이징 적용)
-        Page<User> usersPage = userRepository.findAll(pageable);
+        Page<User> usersPage = userRepository.findAll(pageable); // 조회된 사용자 데이터를 List<User> 형태로 가져옴
 
         // List<User> → List<UserResponse> 변환 후 반환
         return usersPage.getContent().stream()
                 .map(UserResponse::new)
-                .collect(Collectors.toList());
-        */
+                .collect(Collectors.toList()); // UserResponse 객체들을 다시 리스트 형태로 수집하는 최종연산
+*/
 
-        /*
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        return userRepository.findAll(pageRequest) // 조회된 사용자 데이터를 List<User> 형태로 가져옴
-                .getContent()
-                .stream()
-                //.map(user -> new UserResponse(user.getId(), user.getName(), user.getAge()))
-                .map(UserResponse::new) // map(): 스트림 요소를 사용하려는 형태로 변환하는 중간연산 / UserResponse::new(생성자 참조, (user) -> new UserResponse(user);와 동일한 형태) : User 객체를 UserResponse 객체로 변환
-                .collect(Collectors.toList());  // UserResponse 객체들을 다시 리스트 형태로 수집하는 최종연산
-        */
     }
 
     @Transactional
@@ -212,7 +203,7 @@ public class UserServiceV2 {
                         Long ttlInSeconds = redisTemplate.getExpire(cacheKey); // 해당 캐시 데이터 만료 시간(TTL) 조회
                         Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                                 ? Duration.ofSeconds(ttlInSeconds) // 기존 만료시간(TTL) 존재하면 유지
-                                : Duration.ofMinutes(5); // 만료시간(TTL) 존재하지 않으면 5분 설정
+                                : Duration.ofMinutes(3); // 만료시간(TTL) 존재하지 않으면 3분 설정
 
                         // 변경된 회원 목록 Redis에 반영 - set(key, value, duration)
                         redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
@@ -260,7 +251,7 @@ public class UserServiceV2 {
                         Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
                         Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                                 ? Duration.ofSeconds(ttlInSeconds)
-                                : Duration.ofMinutes(5);
+                                : Duration.ofMinutes(3);
 
                         // 삭제된 회원이 반영된 리스트 Redis에 반영 - set(key, value, duration)
                         redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
@@ -283,7 +274,7 @@ public class UserServiceV2 {
                     Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
                     Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                             ? Duration.ofSeconds(ttlInSeconds)
-                            : Duration.ofMinutes(5); // 기본 TTL 5분
+                            : Duration.ofMinutes(3); // 기본 TTL 3분
 
                     // 캐시 업데이트 (삭제된 회원이 반영된 리스트 저장)
                     redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);

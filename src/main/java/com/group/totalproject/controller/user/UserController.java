@@ -11,9 +11,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +48,8 @@ public class UserController { // Controller: API와 HTTP 담당
     public ResponseEntity<List<UserResponse>> getUsers(
         @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "100") int size
     ) {
+
+        // CURCOR 기반 페이징 적용
         // API 조회 시작 시간
         long start = System.currentTimeMillis();
 
@@ -79,9 +84,28 @@ public class UserController { // Controller: API와 HTTP 담당
 
         return new ResponseEntity<>(users, headers, HttpStatus.OK);
 
-        // return ResponseEntity.ok(userService.getUsers(cursor, size));
+/*
+        // OFFSET 기반 페이징 적용
+        long start = System.currentTimeMillis();
 
-        /* 첫번째
+        // 캐시는 사용하지 않으므로 MISS로 고정
+        boolean isHit = false;
+
+        List<UserResponse> users = userService.getUsers(cursor, size);
+
+        long end = System.currentTimeMillis();
+        long duration = end - start;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Cache", "MISS");
+        headers.add("X-Response-Time", duration + "ms");
+
+        return new ResponseEntity<>(users, headers, HttpStatus.OK);
+*/
+
+
+
+        /* 1. 초창기 방식: 컬렉션 순회하며 변환
         List<UserResponse> responses = new ArrayList<>();
         for (int i = 0; i < users.size(); i++) {
             responses.add(new UserResponse(i+1, users.get(i)));
@@ -89,9 +113,9 @@ public class UserController { // Controller: API와 HTTP 담당
         return responses;
         */
 
-        /* 두번째
+        /* 2. JDBC + RowMapper
         return jdbcTemplate.query(sql, new RowMapper<UserResponse>() { // sql 결과들을 UserResponse 객체로 반환, RowMapper는 함수형 인터페이스
-            @Overrid    e
+            @Override
             public UserResponse mapRow(ResultSet rs, int rowNum) throws SQLException { // mapROW: sql 결과를 UserResponse 객체로 매핑하여 결과를 리턴
                 long id = rs.getLong("id");
                 String name = rs.getString("name");
@@ -101,9 +125,9 @@ public class UserController { // Controller: API와 HTTP 담당
         });
         */
         
-        /* 세번째
+        /* 3. JDBC + 람다식: 코드 간결화
         String sql = "SELECT * FROM user";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> { // 두번째 익명 클래스(익명 객체)를 람다식으로 변환 RowMapper
+        return jdbcTemplate.query(sql, (rs, rowNum) -> { // 두번째 익명 클래스(익명 객체)를 람다식으로 변환
             long id = rs.getLong("id");
             String name = rs.getString("name");
             int age = rs.getInt("age");

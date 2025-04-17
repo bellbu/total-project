@@ -92,7 +92,7 @@ public class RedisConfig { // Redis 서버 연결 설정하고 RedisTemplate을 
                         // Jackson2JsonRedisSerializer: Java 객체를 JSON 문자열 형태로 직렬화해서 저장
                         // Object.class: 다양한 데이터 타입을 저장할 수 있도록 설정
                         new Jackson2JsonRedisSerializer<>(Object.class)))
-                .entryTtl(Duration.ofMinutes(5));
+                .entryTtl(Duration.ofMinutes(3));
 
         return RedisCacheManager.builder(redisConnectionFactory) // 주입받은 redisConnectionFactory를 사용하여 Redis 캐시 매니저를 생성
                 .cacheDefaults(cacheConfig) // 앞서 정의한 캐시 설정(cacheConfig) 적용

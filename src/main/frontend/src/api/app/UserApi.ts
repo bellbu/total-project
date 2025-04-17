@@ -7,7 +7,7 @@ export class UserApi {
   }
 
   static getUser = (cursor: number | null, size: number) => {
-    return request<UserData[]>(RequestMethod.GET, 'user', cursor ? { cursor, size } : { size }, {}, 'full') // ✅ 수정
+    return request<UserData[]>(RequestMethod.GET, 'user', cursor ? { cursor, size } : { size }, {}, 'full')
   }
 
   static putUser = (id: number, name: string, pageSize: number) => {
