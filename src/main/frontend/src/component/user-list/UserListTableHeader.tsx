@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from "styled-components";
 import {Colors} from "../../resource/Colors";
+import Lottie from "lottie-react";
+import refreshAnimation from "../../resource/icon/refresh.json";
 
 const Container = styled.header`
   position: relative;
@@ -11,7 +13,7 @@ const Container = styled.header`
   flex-direction: row;
   align-items: center;
   border-bottom: 1px solid black;
-  padding: 0 20px;
+  padding: 0px 0px 0px 20px;
 `;
 
 const Title = styled.p`
@@ -26,7 +28,7 @@ const TitleRightContainer = styled.div`
   margin-left: auto;
   display: flex;
   align-items: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: ${Colors.primaryColor};
 `;
@@ -40,7 +42,25 @@ const Separator = styled.span`
   color: #6c757d; // 구분선 색상 연하게
   font-weight: 400;
 `;
-const UserListTableHeader = ({ userCount, searchedCount }: { userCount: number, searchedCount:number } ) => {
+
+const ResetButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+`;
+
+interface UserListTableHeaderProps {
+  userCount: number;
+  searchedCount: number;
+  isRefreshing: boolean; // 애니메이션 상태
+  onReset: () => void; // 새로 조회하는 함수
+}
+
+const UserListTableHeader = ({ userCount, searchedCount, isRefreshing, onReset }: UserListTableHeaderProps ) => {
     const formattedTotalCount = userCount.toLocaleString();
     const formattedSearchedCount = searchedCount.toLocaleString();
 
@@ -52,6 +72,9 @@ const UserListTableHeader = ({ userCount, searchedCount }: { userCount: number, 
                 <Highlighted>{formattedSearchedCount} 명 조회</Highlighted>
                 <Separator>|</Separator>
                 <span>총 회원 수 : {formattedTotalCount} 명</span>
+                <ResetButton onClick={onReset}>
+                    <Lottie animationData={refreshAnimation} loop={isRefreshing} style={{ width: 45, height: 45 }} />
+                </ResetButton>
               </TitleRightContainer>
         </Container>
     );

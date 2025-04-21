@@ -4,6 +4,8 @@ import { UserData } from "../../model/UserData";
 import { UserApi } from "../../api/app/UserApi";
 import UserListTableHeader from "../../component/user-list/UserListTableHeader";
 import UserListTableItem from "../../component/user-list/UserListTableItem";
+import PagingTypeSelector from "../../component/user-list/PagingTypeSelector";
+import CacheStatusBadge from '../../component/user-list/CacheStatusBadge';
 import Lottie from "lottie-react";
 import loadingAnimation from "../../resource/icon/loading.json";
 import * as Swal from '../../api/common/alert';
@@ -12,7 +14,7 @@ import { PAGE_SIZE } from '../../constants/pageSize';
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  margin: 20px 150px;
+  margin: 0px 149px 20px;
 `;
 
 const LoadingWrapper = styled.div`
@@ -20,28 +22,6 @@ const LoadingWrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100px;
-`;
-
-// 캐시 상태 배지 CSS
-const CacheStatusBadge = styled.div<{ visible: boolean; type: 'HIT' | 'MISS' }>`
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  padding: 14px 24px;
-  background-color: ${(props) => (props.type === 'HIT' ? '#28a745' : 'firebrick')};
-  color: #fff;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: bold;
-  z-index: 9999;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
-  opacity: ${(props) => (props.visible ? 1 : 0)};
-  transform: ${(props) => (props.visible ? 'translateY(0)' : 'translateY(10px)')};
-  transition: all 0.4s ease;
 `;
 
 const UserListPage = () => {
@@ -55,6 +35,11 @@ const UserListPage = () => {
   const [ttlSeconds, setTtlSeconds] = useState<number | null>(null); // 현재 캐시 TTL(유효시간) 관리
   const [cacheVisible, setCacheVisible] = useState(false); // 캐시 상태 배지 표시 여부
   const cacheTimeoutRef = useRef<number | null>(null); // 캐시 배지 표시 시간 타이머
+  const [pagingType, setPagingType] = useState<'cache-cursor' | 'cursor' | 'offset'>(
+    () => (localStorage.getItem('pagingType') as 'cache-cursor' | 'cursor' | 'offset') || 'cache-cursor'
+  );
+  const [page, setPage] = useState(0); // offset 방식일 때 페이지 번호
+  const [refreshing, setRefreshing] = useState(false); // 애니메이션 제어 상태 추가
 
   // TTL 카운트다운
   useEffect(() => {
@@ -78,12 +63,14 @@ const UserListPage = () => {
   }, [ttlSeconds]);
 
   const loadUsers = useCallback(async () => {
+      console.log("refreshing",refreshing);
     if (!hasMore || isLoading) return; // 불러올 데이터가 없거나 데이터 로딩 중인 경우 함수 종료
 
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 로딩 중(회원 조회 중)
-
-      const response = await UserApi.getUser(cursor, PAGE_SIZE); // 회원 조회 API
+      console.log("pagingType1111 : ",pagingType);
+      console.log("page222 : ", page);
+      const response = await UserApi.getUser(cursor, page, PAGE_SIZE, pagingType); // 회원 조회 API
       // 응답 데이터 추출
       const data = response.data; // 회원 리스트
       // 응답 헤더 값 추출
@@ -137,6 +124,7 @@ const UserListPage = () => {
           // 마지막 요소의 회원 id를 cursor 값으로 설정
           setCursor(data[data.length -1].id);
           setHasMore(true);
+          setPage(prev => prev + 1); // 페이지 1 증가
       } else {
           setHasMore(false);
       }
@@ -147,7 +135,7 @@ const UserListPage = () => {
     } finally {
       setIsLoading(false); // isLoading이 false인 경우 => 회원 조회 X
     }
-  }, [cursor, hasMore, isLoading]);
+  }, [cursor, hasMore, isLoading, pagingType]);
 
   useEffect(() => {
     // observer(IntersectionObserver 객체) 선언
@@ -197,9 +185,23 @@ const UserListPage = () => {
     setTotalCount(prev => Math.max(0, prev - 1)); // 삭제 시 총 회원수 -1 감소
   };
 
+  // 페이징 타입 변경 핸들러
+  const handlePagingTypeChange = (type: 'cache-cursor' | 'cursor' | 'offset') => {
+    setPagingType(type);
+    localStorage.setItem('pagingType', type);
+  };
+
+  const handleReset = async () => {
+    setRefreshing(true);
+    window.location.reload();
+    setRefreshing(false);
+  };
+
   return (
     <Container>
-      <UserListTableHeader userCount={totalCount} searchedCount={userList.length} />
+      <PagingTypeSelector currentType={pagingType} onChange={handlePagingTypeChange} />
+
+      <UserListTableHeader userCount={totalCount} searchedCount={userList.length} onReset={handleReset} isRefreshing={refreshing} />
       {userList.map(item => (
         <UserListTableItem
           key={item.id}
@@ -211,9 +213,7 @@ const UserListPage = () => {
       ))}
 
       {/* 캐시 상태 배지 */}
-      <CacheStatusBadge visible={cacheVisible} type={cacheStatus?.type || 'MISS'}>
-        {cacheStatus ? `${cacheStatus.message} - 조회 속도: ${cacheStatus.speed} ${cacheStatus.type === 'HIT' && ttlSeconds !== null ? `, TTL: ${ttlSeconds}초` : ''}` : ''}
-      </CacheStatusBadge>
+      <CacheStatusBadge visible={cacheVisible} type={cacheStatus?.type || 'MISS'} message={cacheStatus?.message} speed={cacheStatus?.speed} ttlSeconds={ttlSeconds} />
 
       {/* 로딩 중일 때 Lottie 애니메이션 표시 */}
       {isLoading && (

@@ -196,6 +196,8 @@ const LoginContextProvider = ({children}) => {
         // 권한 정부 초기화
         setAuthorities(null);
 
+        localStorage.clear();
+
     }
 
 

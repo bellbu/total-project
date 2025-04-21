@@ -11,12 +11,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -46,10 +43,55 @@ public class UserController { // Controller: API와 HTTP 담당
     @GetMapping("/user") // 목록보기
     @PreAuthorize("hasAuthority('ROLE_ADMIN')") // @PreAuthorize("hasAuthority('ROLE_ADMIN')"): Spring Security의 어노테이션, ROLE_ADMIN 권한이 있어야 접근 가능.
     public ResponseEntity<List<UserResponse>> getUsers(
-        @RequestParam(required = false) Long cursor, @RequestParam(defaultValue = "100") int size
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size,
+            @RequestParam(defaultValue = "cache-cursor")String type
     ) {
 
-        // CURCOR 기반 페이징 적용
+        List<UserResponse> users;
+        HttpHeaders headers = new HttpHeaders();
+        String key = "";
+        boolean isHit = false;
+
+        long start = System.currentTimeMillis();
+
+        switch (type) {
+            case "cache-cursor":
+                key = "users:cursor:" + (cursor != null ? cursor : "0") + ":size:" + size;
+                Cache cache = cacheManager.getCache("getUsers");
+                if (cache != null && cache.get(key) != null) {
+                    isHit = true;
+                }
+                users = userService.getUsersWithCache(cursor, size);
+                break;
+
+            case "cursor":
+                users = userService.getUsersWithCursor(cursor, size);
+                break;
+
+            case "offset":
+                users = userService.getUsersWithOffset(page, size);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid type: " + type);
+        }
+
+        long duration = System.currentTimeMillis() - start;
+
+        headers.add("X-Cache", isHit ? "HIT" : "MISS");
+        headers.add("X-Response-Time", duration + "ms");
+
+        if (isHit) {
+            Long ttl = redisTemplate.getExpire("getUsers::" + key, TimeUnit.SECONDS);
+            headers.add("X-TTL", ttl != null && ttl > 0 ? ttl.toString() : "No TTL");
+        }
+
+        return new ResponseEntity<>(users, headers, HttpStatus.OK);
+
+/*
+        1. CURCOR 기반 페이징 적용
         // API 조회 시작 시간
         long start = System.currentTimeMillis();
 
@@ -83,9 +125,10 @@ public class UserController { // Controller: API와 HTTP 담당
         }
 
         return new ResponseEntity<>(users, headers, HttpStatus.OK);
+*/
 
 /*
-        // OFFSET 기반 페이징 적용
+        2. OFFSET 기반 페이징 적용
         long start = System.currentTimeMillis();
 
         // 캐시는 사용하지 않으므로 MISS로 고정
@@ -105,7 +148,7 @@ public class UserController { // Controller: API와 HTTP 담당
 
 
 
-        /* 1. 초창기 방식: 컬렉션 순회하며 변환
+        /* 3. 초창기 방식: 컬렉션 순회하며 변환
         List<UserResponse> responses = new ArrayList<>();
         for (int i = 0; i < users.size(); i++) {
             responses.add(new UserResponse(i+1, users.get(i)));
@@ -113,7 +156,7 @@ public class UserController { // Controller: API와 HTTP 담당
         return responses;
         */
 
-        /* 2. JDBC + RowMapper
+        /* 4. JDBC + RowMapper
         return jdbcTemplate.query(sql, new RowMapper<UserResponse>() { // sql 결과들을 UserResponse 객체로 반환, RowMapper는 함수형 인터페이스
             @Override
             public UserResponse mapRow(ResultSet rs, int rowNum) throws SQLException { // mapROW: sql 결과를 UserResponse 객체로 매핑하여 결과를 리턴
@@ -125,7 +168,7 @@ public class UserController { // Controller: API와 HTTP 담당
         });
         */
         
-        /* 3. JDBC + 람다식: 코드 간결화
+        /* 5. JDBC + 람다식: 코드 간결화
         String sql = "SELECT * FROM user";
         return jdbcTemplate.query(sql, (rs, rowNum) -> { // 두번째 익명 클래스(익명 객체)를 람다식으로 변환
             long id = rs.getLong("id");

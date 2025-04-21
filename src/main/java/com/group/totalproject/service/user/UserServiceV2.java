@@ -95,6 +95,54 @@ public class UserServiceV2 {
 
     }
 
+    // CACHE + CURSOR 기반 페이징 적용
+    // @Cacheable: 메서드 실행 결과를 캐시에 저장
+    // Cache Aside 전략으로 캐싱 적용 (cacheNames: 캐시 이름을 설정 / key: Redis에 저장할 Key의 이름을 설정(#변수: 매개변수 값) / cacheManager: RedisCacheConfig에서 사용할 cacheManager의 Bean 이름을 지정)
+    @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: '0') + ':size:' + #size", cacheManager = "userCacheManager")
+    @Transactional(readOnly = true) // 읽기 전용 트랜잭션
+    public List<UserResponse> getUsersWithCache(Long cursor, int size) {
+        return getUsersByCursor(cursor, size);
+    }
+
+    // CURSOR 기반 페이징 적용
+    @Transactional(readOnly = true) // 읽기 전용 트랜잭션
+    public List<UserResponse> getUsersWithCursor(Long cursor, int size) {
+        return getUsersByCursor(cursor, size);
+    }
+
+    private List<UserResponse> getUsersByCursor(Long cursor, int size) {
+        // Pageable 객체 생성(JPA 페이징 처리 객체): 한 번에 몇 개의 데이터를 가져올지 (LIMIT ?) 설정하는 역할
+        Pageable pageable = PageRequest.of(0, size);  // PageRequest.of(0, size): 0 - 조회 페이지 번호, size - 페이지 당 로우 개수
+        List<User> users;
+
+        if (cursor == null) { // 처음 조회(첫 페이지 조회)할 때 최신 회원 데이터 size개 가져옴
+            users = userRepository.findTopByOrderByIdDesc(pageable);
+        } else {
+            users = userRepository.findByIdLessThanOrderByIdDesc(cursor, pageable); // IdLessThan: id < cursor 조건을 의미
+        }
+
+        // List<User> → List<UserResponse> 변환
+        return users.stream() // .stream(): 리스트를 스트림으로 변환(데이터를 하나씩 처리할 수 있는 형태로 변환)
+                .map(UserResponse::new) // .map(): 스트림의 각 요소를 다른 값으로 변환할 때 사용 / UserResponse::new 는 user -> new UserResponse(user)와 같은 의미
+                .collect(Collectors.toList()); // 변환된 스트림을 다시 리스트로 변환
+    }
+
+    // OFFSET 기반 페이징 적용
+    @Transactional(readOnly = true) // 읽기 전용 트랜잭션
+    public List<UserResponse> getUsersWithOffset(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        Page<User> usersPage = userRepository.findAll(pageable); // 조회된 사용자 데이터를 List<User> 형태로 가져옴
+
+        // List<User> → List<UserResponse> 변환 후 반환
+        return usersPage.getContent().stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toList()); // UserResponse 객체들을 다시 리스트 형태로 수집하는 최종연산
+
+    }
+
+/*
     // @Cacheable: 메서드 실행 결과를 캐시에 저장
     // Cache Aside 전략으로 캐싱 적용 (cacheNames: 캐시 이름을 설정 / key: Redis에 저장할 Key의 이름을 설정(#변수: 매개변수 값) / cacheManager: RedisCacheConfig에서 사용할 cacheManager의 Bean 이름을 지정)
     @Cacheable(cacheNames = "getUsers", key = "'users:cursor:' + (#cursor ?: '0') + ':size:' + #size", cacheManager = "userCacheManager")
@@ -118,6 +166,7 @@ public class UserServiceV2 {
                 .map(UserResponse::new) // .map(): 스트림의 각 요소를 다른 값으로 변환할 때 사용 / UserResponse::new 는 user -> new UserResponse(user)와 같은 의미
                 .collect(Collectors.toList()); // 변환된 스트림을 다시 리스트로 변환
 
+*/
 /*
         // OFFSET 기반 페이징 적용
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
@@ -128,9 +177,11 @@ public class UserServiceV2 {
         return usersPage.getContent().stream()
                 .map(UserResponse::new)
                 .collect(Collectors.toList()); // UserResponse 객체들을 다시 리스트 형태로 수집하는 최종연산
-*/
+*//*
+
 
     }
+*/
 
     @Transactional
     public void updateUser(UserUpdateRequest request) {
