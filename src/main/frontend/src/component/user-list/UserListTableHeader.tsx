@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import styled from "styled-components";
 import {Colors} from "../../resource/Colors";
-import Lottie from "lottie-react";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import refreshAnimation from "../../resource/icon/refresh.json";
 
 const Container = styled.header`
-  position: relative;
+  position: sticky;
+  background-color: #fff;
+  top: 108px;
+  z-index: 99;
   width: 100%;
   height: 62px;
   display: flex;
@@ -56,13 +59,16 @@ const ResetButton = styled.button`
 interface UserListTableHeaderProps {
   userCount: number;
   searchedCount: number;
-  isRefreshing: boolean; // 애니메이션 상태
   onReset: () => void; // 새로 조회하는 함수
 }
 
-const UserListTableHeader = ({ userCount, searchedCount, isRefreshing, onReset }: UserListTableHeaderProps ) => {
+const UserListTableHeader = forwardRef<LottieRefCurrentProps, UserListTableHeaderProps>(({ userCount, searchedCount, onReset }, ref) => {
     const formattedTotalCount = userCount.toLocaleString();
     const formattedSearchedCount = searchedCount.toLocaleString();
+    // 내부에서 lottieRef 생성
+    const lottieRef = useRef<LottieRefCurrentProps>(null);
+    // 부모에서 ref 사용할 수 있게 expose
+    useImperativeHandle(ref, () => lottieRef.current as LottieRefCurrentProps);
 
     return (
         <Container>
@@ -73,11 +79,11 @@ const UserListTableHeader = ({ userCount, searchedCount, isRefreshing, onReset }
                 <Separator>|</Separator>
                 <span>총 회원 수 : {formattedTotalCount} 명</span>
                 <ResetButton onClick={onReset}>
-                    <Lottie animationData={refreshAnimation} loop={isRefreshing} style={{ width: 45, height: 45 }} />
+                    <Lottie lottieRef={lottieRef} animationData={refreshAnimation} loop={false} style={{ width: 45, height: 45 }} />
                 </ResetButton>
               </TitleRightContainer>
         </Container>
     );
-};
+});
 
 export default UserListTableHeader;

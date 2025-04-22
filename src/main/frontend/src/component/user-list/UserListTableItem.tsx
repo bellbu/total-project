@@ -8,7 +8,6 @@ import * as Swal from "../../api/common/alert";
 
 const Container = styled.div`
   position: relative;
-
   width: 100%;
   height: 85px;
   display: flex;

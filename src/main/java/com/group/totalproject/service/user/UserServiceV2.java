@@ -209,6 +209,35 @@ public class UserServiceV2 {
         // 5. 회원 이름 변경
         user.updateName(request.getName());
 
+        // 6. 데이터 정합성 부분 수정 - Redis에서 해당 회원이 포함된 캐시만 찾아서 수정
+        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + request.getPageSize());
+        if (cacheKeys != null) {
+            for (String cacheKey : cacheKeys) {
+                List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
+                if (cachedUsers != null) {
+                    boolean updated = false;
+
+                    for (int i = 0; i < cachedUsers.size(); i++) {
+                        UserResponse u = cachedUsers.get(i);
+                        if (Long.valueOf(u.getId()).equals(request.getId())) {
+                            cachedUsers.set(i, new UserResponse(u.getId(), request.getName(), u.getAge()));
+                            updated = true;
+                        }
+                    }
+
+                    if (updated) {
+                        Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
+                        Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
+                                ? Duration.ofSeconds(ttlInSeconds)
+                                : Duration.ofMinutes(3);
+
+                        redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
+                    }
+                }
+            }
+        }
+
+/*
         // 6. Redis에서 해당 회원이 포함된 캐시만 찾아서 수정
         Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + request.getPageSize()); // 모든 캐시 키 조회
         if (cacheKeys != null) {
@@ -238,19 +267,6 @@ public class UserServiceV2 {
                                         : u // 나머지 회원은 그대로 유지
                         );
 
-                        /*
-                        List<UserResponse> updatedUsers = new ArrayList<>(); // 변경된 회원 목록을 담을 새로운 리스트 생성
-
-                        for (UserResponse u : cachedUsers) {
-                            if (u.getId() == request.getId()) {
-                                // 수정할 회원 새로운 UserResponse 객체 생성하여 이름 변경
-                                updatedUsers.add(new UserResponse(u.getId(), request.getName(), u.getAge()));
-                            } else {
-                                updatedUsers.add(u);
-                            }
-                        }
-                        */
-
                         Long ttlInSeconds = redisTemplate.getExpire(cacheKey); // 해당 캐시 데이터 만료 시간(TTL) 조회
                         Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                                 ? Duration.ofSeconds(ttlInSeconds) // 기존 만료시간(TTL) 존재하면 유지
@@ -262,23 +278,45 @@ public class UserServiceV2 {
                 }
             }
         }
+*/
 
     }
 
     @Transactional
     public void deleteUser(String name, int pageSize) {
-        // 회원 유무 조회
+        // 1. 회원 유무 조회
         User user = userRepository.findByName(name)
                 .orElseThrow(IllegalArgumentException::new);
 
-        // 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
+        // 2. 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
         if (userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId())) {
             throw new IllegalArgumentException("대출 중인 회원은 삭제할 수 없습니다. \n반납 후 다시 시도해주세요.");
         }
 
-        // 회원 삭제
+        // 3. 회원 삭제
         userRepository.delete(user);
 
+        // 4. 데이터 정합성 부분 수정 - 삭제된 회원이 포함된 캐시만 찾아서 수정
+        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + pageSize);
+        if (cacheKeys != null) {
+            for (String cacheKey : cacheKeys) {
+                List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
+                if (cachedUsers != null) {
+                    boolean removed = cachedUsers.removeIf(u -> Long.valueOf(u.getId()).equals(user.getId()));
+                    if (removed) {
+                        Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
+                        Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
+                                ? Duration.ofSeconds(ttlInSeconds)
+                                : Duration.ofMinutes(3);
+
+                        redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
+                    }
+                }
+            }
+        }
+
+/*
+        // 삭제된 회원이 포함된 캐시만 찾아서 수정
         Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + pageSize);
         if (cacheKeys != null) {
             for (String cacheKey : cacheKeys) {
@@ -310,6 +348,7 @@ public class UserServiceV2 {
                 }
             }
         }
+*/
 
         /*
         // 회원 삭제

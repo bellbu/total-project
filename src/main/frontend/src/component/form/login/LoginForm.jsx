@@ -22,7 +22,7 @@ const LoginForm = () => {
 
     return (
         <div className="form">
-            <h2 className='login-title'>로그인</h2>
+            <h2 className='login-title'>🔒 관리자 로그인</h2>
 
             <form className="login-form" onSubmit={(e) => onLogin(e)}>
                 <div>

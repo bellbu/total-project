@@ -21,7 +21,7 @@ const Background = styled.div`
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.56);
+  //background-color: rgba(0, 0, 0, 0.56);
 `;
 
 const Content = styled.div`
@@ -29,12 +29,11 @@ const Content = styled.div`
   height: 240px;
   background-color: white;
   padding: 20px;
-
   display: flex;
   flex-direction: column;
   align-items: center;
-  
   z-index: 1;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 `;
 
 const Title = styled.p`

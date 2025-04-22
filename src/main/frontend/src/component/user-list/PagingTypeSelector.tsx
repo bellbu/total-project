@@ -16,13 +16,12 @@ const PagingTypeWrapper = styled.div`
   justify-content: center;
   align-items: center;
   gap: 35px;
-  margin-bottom: 15px;
   position: sticky; /* 상단에 고정 */
   top: 0px; /* 고정될 위치 */
   background-color: #fff; /* 배경색을 흰색으로 설정하여 콘텐츠가 겹치지 않게 함 */
   z-index: 100; /* 다른 요소들 위에 고정되도록 설정 */
-  padding-top: 20px; /* 상단 간격 조정 */
-  padding-bottom: 10px; /* 하단 간격 조정 */
+  padding: 20px 0 10px;
+  height: 78px;
 `;
 
 const ButtonGroup = styled.div`

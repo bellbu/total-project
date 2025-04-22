@@ -39,7 +39,7 @@ const UserListPage = () => {
     () => (localStorage.getItem('pagingType') as 'cache-cursor' | 'cursor' | 'offset') || 'cache-cursor'
   );
   const [page, setPage] = useState(0); // offset 방식일 때 페이지 번호
-  const [refreshing, setRefreshing] = useState(false); // 애니메이션 제어 상태 추가
+  const refreshLottieRef = useRef<any>(null);
 
   // TTL 카운트다운
   useEffect(() => {
@@ -62,15 +62,15 @@ const UserListPage = () => {
     return () => clearInterval(interval); // 클린업 함수
   }, [ttlSeconds]);
 
-  const loadUsers = useCallback(async () => {
-      console.log("refreshing",refreshing);
+  const loadUsers = useCallback(async (customCursor = cursor, customPage = page) => {
     if (!hasMore || isLoading) return; // 불러올 데이터가 없거나 데이터 로딩 중인 경우 함수 종료
 
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 로딩 중(회원 조회 중)
-      console.log("pagingType1111 : ",pagingType);
-      console.log("page222 : ", page);
-      const response = await UserApi.getUser(cursor, page, PAGE_SIZE, pagingType); // 회원 조회 API
+      console.log("cursor : ",cursor);
+      console.log("page : ",page);
+      const response = await UserApi.getUser(customCursor, customPage, PAGE_SIZE, pagingType); // 회원 조회 API
+      console.log("userList : ", response.data[0]);
       // 응답 데이터 추출
       const data = response.data; // 회원 리스트
       // 응답 헤더 값 추출
@@ -157,18 +157,19 @@ const UserListPage = () => {
     return () => observer.disconnect(); // disconnect(): 감지 해제
   }, [loadUsers]);
 
-  useEffect(() => {
-    const fetchTotalCount = async () => {
-      try {
+  const fetchTotalCount = useCallback(async () => {
+    try {
         const count = await UserApi.getUserCount();
         setTotalCount(count);
-      } catch (error) {
+    } catch (error) {
         console.error('Failed to load total count:', error);
         Swal.alert(error, '', 'error');
-      }
-    };
-    fetchTotalCount();
+    }
   }, []);
+
+  useEffect(() => {
+    fetchTotalCount();
+  }, [fetchTotalCount]);
 
   // 회원 수정
   const handleUserUpdate = (userId: number, newName: string) => {
@@ -192,16 +193,27 @@ const UserListPage = () => {
   };
 
   const handleReset = async () => {
-    setRefreshing(true);
-    window.location.reload();
-    setRefreshing(false);
+    if (refreshLottieRef.current) {
+        refreshLottieRef.current.stop();
+        refreshLottieRef.current.play();
+    }
+    // 데이터 초기화
+    setUserList([]);
+    setHasMore(true);
+    setCursor(null);
+    setPage(0);
+
+    // state가 즉각 반영되는 건 아니니까 강제로 초기값 넘겨서 호출
+    await loadUsers(null, 0);
+    await fetchTotalCount();   // 새로운 총 회원 수를 가져오기
+
   };
 
   return (
     <Container>
       <PagingTypeSelector currentType={pagingType} onChange={handlePagingTypeChange} />
 
-      <UserListTableHeader userCount={totalCount} searchedCount={userList.length} onReset={handleReset} isRefreshing={refreshing} />
+      <UserListTableHeader userCount={totalCount} searchedCount={userList.length} onReset={handleReset} ref={refreshLottieRef} />
       {userList.map(item => (
         <UserListTableItem
           key={item.id}
