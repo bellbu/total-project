@@ -14,11 +14,14 @@ const Container = styled.div`
   min-width: 1440px;
 `
 
-const ContentsContainer = styled.div`
+const ContentsContainer = styled.div<{ isUserTab: boolean }>`
   width: 100%;
   height: calc(100% - 6vh);
   box-sizing: border-box;
   overflow-y: auto;
+  ${(props) => props.isUserTab && `
+      scrollbar-gutter: stable;
+` }
 `;
 
 // Tab 타입
@@ -45,7 +48,7 @@ const MainPage = () => {
   return (
     <Container>
       <MainTopBar setTab={setTab} tab={tab}/>
-      <ContentsContainer>
+      <ContentsContainer isUserTab={tab === Tab.USER}>
         {tab === Tab.FORM && <FormPage />} {/* tab === Tab.FORM가 true인 경우 => <FormPage /> 렌더링 */}
         {tab === Tab.USER && <UserListPage />}
         {tab === Tab.ADMIN && <Admin />}

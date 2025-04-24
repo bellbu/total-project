@@ -162,7 +162,7 @@ const MainTopBar = ({ setTab, tab }: Props) => {
                 setJwtExpirationTime(newExpiration);
             }
         } catch (error) {
-            Swal.alert('세션 만료', '다시 로그인해주세요.', 'warning');
+            Swal.alert('로그인 정보가 만료되었습니다.', '다시 로그인해주세요.', 'warning');
             logout(true);
         }
     };

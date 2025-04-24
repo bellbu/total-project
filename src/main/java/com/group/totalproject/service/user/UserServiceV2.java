@@ -209,18 +209,18 @@ public class UserServiceV2 {
         // 5. 회원 이름 변경
         user.updateName(request.getName());
 
-        // 6. 데이터 정합성 부분 수정 - Redis에서 해당 회원이 포함된 캐시만 찾아서 수정
-        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + request.getPageSize());
+        // 6. Redis에서 해당 회원이 포함된 캐시만 찾아서 수정 수정된 회원의 데이터가 있는 캐시 키를 찾아서 해당 회원 수정 후 레디스에 저장
+        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + request.getPageSize()); // Redis에 저장된 캐시의 모든 Key값을 조회
         if (cacheKeys != null) {
             for (String cacheKey : cacheKeys) {
-                List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
+                List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey); // opsForValue(): key-value의 데이터를 다루기 위한 메서드 / get(key): 해당 키에 해당하는 value값을 가져오는 메소드
                 if (cachedUsers != null) {
                     boolean updated = false;
 
                     for (int i = 0; i < cachedUsers.size(); i++) {
                         UserResponse u = cachedUsers.get(i);
                         if (Long.valueOf(u.getId()).equals(request.getId())) {
-                            cachedUsers.set(i, new UserResponse(u.getId(), request.getName(), u.getAge()));
+                            cachedUsers.set(i, new UserResponse(u.getId(), request.getName(), u.getAge())); // 캐시 데이터의 해당 회원 정보 수정
                             updated = true;
                         }
                     }
@@ -231,7 +231,7 @@ public class UserServiceV2 {
                                 ? Duration.ofSeconds(ttlInSeconds)
                                 : Duration.ofMinutes(3);
 
-                        redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
+                        redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL); // 수정된 리스트(cachedUsers)를 기존 TTL을 유지한 채로 다시 Redis에 저장
                     }
                 }
             }
@@ -296,20 +296,20 @@ public class UserServiceV2 {
         // 3. 회원 삭제
         userRepository.delete(user);
 
-        // 4. 데이터 정합성 부분 수정 - 삭제된 회원이 포함된 캐시만 찾아서 수정
-        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + pageSize);
+        // 4. 삭제된 회원의 데이터가 있는 캐시 키를 찾아서 해당 회원 삭제 후 레디스에 저장
+        Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + pageSize); // Redis에 저장된 캐시의 모든 Key값을 조회
         if (cacheKeys != null) {
             for (String cacheKey : cacheKeys) {
-                List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey);
+                List<UserResponse> cachedUsers = redisTemplate.opsForValue().get(cacheKey); // opsForValue(): key-value의 데이터를 다루기 위한 메서드 / get(key): 해당 키에 해당하는 value값을 가져오는 메소드
                 if (cachedUsers != null) {
-                    boolean removed = cachedUsers.removeIf(u -> Long.valueOf(u.getId()).equals(user.getId()));
+                    boolean removed = cachedUsers.removeIf(u -> Long.valueOf(u.getId()).equals(user.getId())); // removeIf(): 조건에 맞는 요소를 리스트에서 제거하는 메소드(true/false로 반환)
                     if (removed) {
                         Long ttlInSeconds = redisTemplate.getExpire(cacheKey);
                         Duration currentTTL = (ttlInSeconds != null && ttlInSeconds > 0)
                                 ? Duration.ofSeconds(ttlInSeconds)
                                 : Duration.ofMinutes(3);
 
-                        redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL);
+                        redisTemplate.opsForValue().set(cacheKey, cachedUsers, currentTTL); // 수정된 리스트(cachedUsers)를 기존 TTL을 유지한 채로 다시 Redis에 저장
                     }
                 }
             }
