@@ -61,14 +61,18 @@ interface UserListTableHeaderProps {
   searchedCount: number;
   onReset: () => void; // 새로 조회하는 함수
 }
-
+// forwardRef: 부모 컴포넌트에서 자식 컴포넌트로 useRef를 전달할 때 사용
+// forwardRef<ref 타입, props 타입>(props, ref)
 const UserListTableHeader = forwardRef<LottieRefCurrentProps, UserListTableHeaderProps>(({ userCount, searchedCount, onReset }, ref) => {
     const formattedTotalCount = userCount.toLocaleString();
     const formattedSearchedCount = searchedCount.toLocaleString();
-    // 내부에서 lottieRef 생성
+
+    // LottieRefCurrentProps: Lottie 애니메이션을 제어하기 위한 타입
     const lottieRef = useRef<LottieRefCurrentProps>(null);
-    // 부모에서 ref 사용할 수 있게 expose
-    useImperativeHandle(ref, () => lottieRef.current as LottieRefCurrentProps);
+
+    // useImperativeHandle(부모가 전달한 ref, 부모에게 노출할 객체): ref를 통해 부모가 자식의 lottieRef.current를 제어
+    // 즉, 아래 코드는 자식 컴포넌트 전체 DOM 노드를 노출하는게 아니라 lottieRef.current만 노출
+    useImperativeHandle(ref, () => lottieRef.current as LottieRefCurrentProps); // lottieRef.current: Lottie 애니메이션 객체
 
     return (
         <Container>

@@ -35,7 +35,7 @@ const UserListPage = () => {
   const [ttlSeconds, setTtlSeconds] = useState<number | null>(null); // 현재 캐시 TTL(유효시간) 관리
   const [cacheVisible, setCacheVisible] = useState(false); // 캐시 상태 배지 표시 여부
   const cacheTimeoutRef = useRef<number | null>(null); // 캐시 배지 표시 시간 타이머
-  const [pagingType, setPagingType] = useState<'cache-cursor' | 'cursor' | 'offset'>(
+  const [pagingType, setPagingType] = useState<'cache-cursor' | 'cursor' | 'offset'>(  // |: 유니온 타입: 여러 타입 중 하나의 타입을 가질 수 있음
     () => (localStorage.getItem('pagingType') as 'cache-cursor' | 'cursor' | 'offset') || 'cache-cursor'
   );
   const [page, setPage] = useState(0); // offset 방식일 때 페이지 번호
@@ -67,10 +67,7 @@ const UserListPage = () => {
 
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 로딩 중(회원 조회 중)
-      console.log("cursor : ",cursor);
-      console.log("page : ",page);
       const response = await UserApi.getUser(customCursor, customPage, PAGE_SIZE, pagingType); // 회원 조회 API
-      console.log("userList : ", response.data[0]);
       // 응답 데이터 추출
       const data = response.data; // 회원 리스트
       // 응답 헤더 값 추출
@@ -83,7 +80,6 @@ const UserListPage = () => {
 
       // 0.2초 뒤에 다시 표시
       setTimeout(() => {
-
         // 조회된 캐시 상태 관리
         if (cacheHeader === 'HIT') {
             const ttl = parseInt(ttlHeader, 10); // parseInt('300', 10): 문자열에서 10진수 정수로 변환
@@ -115,14 +111,13 @@ const UserListPage = () => {
             setCacheVisible(false); // 캐시 상태 배지 숨기기
             cacheTimeoutRef.current = null;
         }, 4000);
-
       }, 200);
 
       setUserList(prev => [...prev, ...data]); // prev(기존의 userList)와 data(새로운 회원 목록) 배열 병합
 
       if(data.length > 0) {
           // 마지막 요소의 회원 id를 cursor 값으로 설정
-          setCursor(data[data.length -1].id);
+          setCursor(data[data.length -1].id); // data[0]부터 시작하므로 마지막 배열 값 구하기 위해서 -1 연산
           setHasMore(true);
           setPage(prev => prev + 1); // 페이지 1 증가
       } else {
@@ -157,6 +152,7 @@ const UserListPage = () => {
     return () => observer.disconnect(); // disconnect(): 감지 해제
   }, [loadUsers]);
 
+  // 전체 회원 수 가져오기
   const fetchTotalCount = useCallback(async () => {
     try {
         const count = await UserApi.getUserCount();
@@ -189,14 +185,17 @@ const UserListPage = () => {
   // 페이징 타입 변경 핸들러
   const handlePagingTypeChange = (type: 'cache-cursor' | 'cursor' | 'offset') => {
     setPagingType(type);
-    localStorage.setItem('pagingType', type);
+    localStorage.setItem('pagingType', type); // 선택된 페이징 타입 로컬에 저장
   };
 
   const handleReset = async () => {
+
+    // Lottie 애니메이션 재생
     if (refreshLottieRef.current) {
         refreshLottieRef.current.stop();
         refreshLottieRef.current.play();
     }
+
     // 데이터 초기화
     setUserList([]);
     setHasMore(true);

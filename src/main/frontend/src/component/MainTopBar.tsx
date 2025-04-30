@@ -78,7 +78,7 @@ const TimeDisplay = styled.div`
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 `;
 
-interface Props { // 부모 컴퍼넌트에서 넘어온 setTab과 tab의 타입을 Props 인터페이스로 정의
+interface Props { // 부모 컴퍼넌트에서 넘어온 setTab과 tab의 값을 Props 인터페이스로 정의
   setTab: (newTab: Tab) => void; // Tab 타입의 매개변수("newTab")를 받아서 void를 반환하는 함수.
   tab: Tab; // Tab 타입
 }

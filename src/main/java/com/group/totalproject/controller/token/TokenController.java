@@ -1,26 +1,20 @@
 package com.group.totalproject.controller.token;
 
 import com.group.totalproject.domain.admin.Admin;
-import com.group.totalproject.domain.admin.AdminRepository;
 import com.group.totalproject.security.custom.CustomAdmin;
 import com.group.totalproject.security.jwt.constants.JwtConstants;
 import com.group.totalproject.security.jwt.provider.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 

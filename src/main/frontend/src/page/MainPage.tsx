@@ -24,7 +24,7 @@ const ContentsContainer = styled.div<{ isUserTab: boolean }>`
 ` }
 `;
 
-// Tab 타입
+// 열거형 객체: Tab, 속성: FORM, USER, ADMIN
 export enum Tab {
    FORM = "mainPage", // Tab.FORM = "main"
    USER = "userPage", // Tab.USER = "user"
@@ -37,8 +37,9 @@ const MainPage = () => {
   const navigate = useNavigate();
 
   // URL에서 현재 탭 가져오기
-  const currentTab = location.pathname.replace("/", "") as Tab; // 현재 URL에서 "/" 제거 후 Tab 타입으로 변환 currentTab = main/user/admin
-  const tab = Object.values(Tab).includes(currentTab) ? currentTab : Tab.FORM; // currentTab이 Tab에 속하면 currentTab이 유지, 속하지 않으면 Tab.FORM(메인) 유지
+  const currentTab = location.pathname.replace("/", "") as Tab; // 현재 URL에서 "/" 제거 후 Tab 타입으로 변환 currentTab = mainPage/userPage/adminPage
+  // 현재 탭이 정의한 Tab 값에 포함되면 현재탭 유지, 포함되지 않으면 메인 페이지 유지
+  const tab = Object.values(Tab).includes(currentTab) ? currentTab : Tab.FORM; // Object.values(Tab): 열거형 Tab객체의 값인 ["mainPage", "userPage", "adminPage"]을 반환
 
   // 탭 변경 시 URL도 변경
   const setTab = (newTab: Tab) => {  // (newTab: Tab) - newTab의 타입을 Tab으로 지정
@@ -47,7 +48,7 @@ const MainPage = () => {
 
   return (
     <Container>
-      <MainTopBar setTab={setTab} tab={tab}/>
+      <MainTopBar setTab={setTab} tab={tab}/> {/* setTab: 탭에 해당하는 URL로 이동 / tab: URL 이동 후 현재 탭 저장 */}
       <ContentsContainer isUserTab={tab === Tab.USER}>
         {tab === Tab.FORM && <FormPage />} {/* tab === Tab.FORM가 true인 경우 => <FormPage /> 렌더링 */}
         {tab === Tab.USER && <UserListPage />}
