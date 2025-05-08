@@ -48,6 +48,11 @@ const UserRegisterForm = () => {
         return;
     }
 
+    if (parseInt(age) < 1 || parseInt(age) > 999) {
+        Swal.alert('나이는 1부터 999까지의 숫자만 입력할 수 있습니다.', '', 'warning');
+        return;
+    }
+
     UserApi.postUser(name, isNaN(parseInt(age)) ? null : parseInt(age), PAGE_SIZE)
       .then(data => {
         Swal.alert('등록에 성공했습니다!', '', 'success');

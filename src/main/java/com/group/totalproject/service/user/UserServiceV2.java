@@ -58,8 +58,8 @@ public class UserServiceV2 {
 
         try {
             int age = Integer.parseInt(request.getAge().toString());
-            if (age < 1) {
-                throw new IllegalArgumentException("나이는 1 이상의 숫자여야 합니다.");
+            if (age < 1 || age > 999) {
+                throw new IllegalArgumentException("나이는 1부터 999까지의 숫자만 입력할 수 있습니다.");
             }
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("나이는 숫자만 입력 가능합니다.");

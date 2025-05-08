@@ -85,8 +85,8 @@ public class AdminService {
         // 유효성 검사
         validateRequest(request);
 
-        // 이메일이 admin@admin.com이면 수정 불가
-        if("admin@admin.com".equals(request.getEmail())) {
+        // 테스트 계정 수정 불가
+        if("admin@admin.com".equals(request.getEmail()) || "user@admin.com".equals(request.getEmail())) {
             throw new IllegalArgumentException("해당 이메일의 관리자는 수정할 수 없습니다.");
         }
 
@@ -113,8 +113,8 @@ public class AdminService {
     @Transactional
     public int deleteAdmin(String email) {
 
-        // 이메일이 admin@admin.com이면 삭제 불가
-        if("admin@admin.com".equals(email)) {
+        // 테스트 계정 삭제 불가
+        if("admin@admin.com".equals(email) || "user@admin.com".equals(email)) {
             throw new IllegalArgumentException("해당 이메일의 관리자는 삭제할 수 없습니다.");
         }
 

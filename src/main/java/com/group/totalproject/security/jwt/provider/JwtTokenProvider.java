@@ -62,7 +62,7 @@ public class JwtTokenProvider {
                 .header()
                 .add("type", JwtConstants.TOKEN_TYPE)
                 .and()
-                .expiration(new Date(System.currentTimeMillis() + 600000)) // 리플래쉬 토큰 만료 시간: 10분
+                .expiration(new Date(System.currentTimeMillis() + 1800000)) // 리플래쉬 토큰 만료 시간: 30분
                 .claim("adminNo", "" + adminNo)
                 .claim("email", email)
                 .compact();
