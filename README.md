@@ -4,9 +4,12 @@
 - **개발 환경: Java, Spring Boot, Spring Security, JWT, JPA, MySQL, Redis, Gradle, React**
 
 - **ERD 설계도**
-![image](https://github.com/user-attachments/assets/e6027e70-797e-4c3d-b332-5d8a17fd6c95)<br/>
+  
+  ![image](https://github.com/user-attachments/assets/e6027e70-797e-4c3d-b332-5d8a17fd6c95)
+<br/>
+<br/>
+<br/>
 
- 
 ## 2. 기존 프로젝트 개선 내용
 
 ### **2-1. 웹 애플리케이션 (Library App)**
