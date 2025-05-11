@@ -50,14 +50,13 @@ public class JwtTokenProvider {
                 .claim("authorities", authorities) // 권한 정보를 클레임(페이로드의 한 조각)에 추가
                 .compact(); // 최종적으로 토큰 생성
 
-        log.info("jwt : " + jwt);
-
         return jwt;
     }
 
     // refreshToken 생성
     public String createRefreshToken(int adminNo, String email) {
-        return Jwts.builder()
+
+        String jwt =  Jwts.builder()
                 .signWith(getShaKey(), Jwts.SIG.HS512)
                 .header()
                 .add("type", JwtConstants.TOKEN_TYPE)
@@ -66,6 +65,8 @@ public class JwtTokenProvider {
                 .claim("adminNo", "" + adminNo)
                 .claim("email", email)
                 .compact();
+
+        return jwt;
     }
 
     /**
@@ -74,8 +75,10 @@ public class JwtTokenProvider {
      */
     public UsernamePasswordAuthenticationToken getAuthentication(String jwt) { // authHeader: Authorization 헤더에서 전달된 토큰 문자열(Bearer + {토큰})
 
-        if(jwt == null || jwt.isEmpty())
+        if(jwt == null || jwt.isEmpty()) {
+            log.warn("getAuthentication 호출됨 - JWT가 null 또는 빈 문자열입니다.");
             return null;
+        }
 
         try {
             // JWT 파싱(해석): Jwts.parser를 사용해 토큰을 해석하고 페이로드를 읽어옴
@@ -89,6 +92,7 @@ public class JwtTokenProvider {
 
             // 토큰에 필요한 정보가 없는 경우 처리
             if (email == null || email.isEmpty()) {
+                log.warn("JWT에서 email 정보가 없습니다.");
                 return null;
             }
 
@@ -105,7 +109,7 @@ public class JwtTokenProvider {
             return new UsernamePasswordAuthenticationToken(new CustomAdmin(admin), null, authorities); // 인증된 사용자(userDetails)와 해당 사용자의 권한들(authorities)을 스프링 시큐리티의 인증 객체로 생성하여 리턴
 
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException exception) {
-            log.warn("JWT 처리 실패: {} - {}", jwt, exception.getMessage());
+            log.warn("JWT 처리 실패: {}", exception.getMessage());
         }
 
         return null;
@@ -124,14 +128,15 @@ public class JwtTokenProvider {
                                         .parseSignedClaims(jwt);
 
             Date exp = parsedToken.getPayload().getExpiration(); // 만료 시간
-
-            //
             /**
              * exp.before(new Date())
              *  - true: 만료 시간(exp)이 현재 시간(new Date())보다 이전임 → 토큰이 만료됨.
              *  - false: 만료 시간(exp)이 현재 시간(new Date()) 이후임 → 토큰이 유효함.
              * */
-            return !exp.before(new Date()); // exp가 new Date()보다 이후여야 true 리턴
+            boolean isValid = !exp.before(new Date()); // exp가 new Date()보다 이후여야 true 리턴
+
+            log.info("JWT 유효성 결과: {}", isValid ? "유효함" : "만료됨");
+            return isValid;
 
         } catch (ExpiredJwtException exception) {
             log.error("Token Expired");                 // 토큰 만료

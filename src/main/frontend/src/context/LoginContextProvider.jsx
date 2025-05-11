@@ -127,8 +127,6 @@ const LoginContextProvider = ({children}) => {
         if( force ) { // force=true인 경우 강제 로그아웃(확인 창X) ex) 세션 만료, 보안 문제 등 사용자가 강제로 로그아웃되어야 하는 경우
             // 로그아웃 세팅
             logoutSetting();
-
-            // 페이지 이동 ➡ "/" (메인)
             navigate("/");
             return
         }
@@ -138,8 +136,6 @@ const LoginContextProvider = ({children}) => {
             if( result.isConfirmed ) {
                 // 로그아웃 세팅
                 logoutSetting();
-
-                // 메인 페이지로 이동
                 navigate("/");
             }
         });

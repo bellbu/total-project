@@ -14,4 +14,3 @@ export const update = (data) => api.put(`/admin`, data)
 
 // 관리자 탈퇴
 export const remove = (email) => api.delete(`/admin/${email}`)
-

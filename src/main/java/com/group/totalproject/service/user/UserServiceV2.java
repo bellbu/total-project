@@ -7,6 +7,7 @@ import com.group.totalproject.dto.user.request.UserCreateRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor // final이 붙은 필드의 생성자를 자동으로 생성
 public class UserServiceV2 {
@@ -34,39 +36,47 @@ public class UserServiceV2 {
     // 혹시라도 문제가 있다면 rollback; 단 IOException과 같은 Checked Exception은 롤백이 일어나지 않음
     @Transactional
     public void saveUser(UserCreateRequest request, int pageSize) {
+        log.info("[회원 등록 요청] 이름: {}, 나이: {}", request.getName(), request.getAge());
 
         // 이름 검증: null 또는 빈 문자열일 경우 예외 처리
         if (request.getName() == null || request.getName().trim().isEmpty()) {
+            log.warn("[이름이 비어 있음]");
             throw new IllegalArgumentException("이름은 필수입니다.");
         }
 
         // 이름 검증: 영어 또는 한글로 시작하고, 뒤에 숫자가 올 수 있는 패턴만 허용
         String nameRegex = "^[a-zA-Z가-힣]+[0-9]*$";
         if (!request.getName().matches(nameRegex)) {
+            log.warn("[이름 형식이 유효하지 않음] 이름: {}", request.getName());
             throw new IllegalArgumentException("이름은 영어 또는 한글로 시작해야 하며, 숫자를 포함할 수 있습니다. \n단, 띄워쓰기는 사용할 수 없습니다.");
         }
 
         // 이름 중복 검사
         if (userRepository.existsByName(request.getName())) {
+            log.warn("[이름 중복 발생] 이름: {}", request.getName());
             throw new IllegalArgumentException("이미 존재하는 이름입니다. \n다른 이름을 사용해주세요.");
         }
 
         // 나이 검증: null, 숫자가 아닌 값, 또는 음수일 경우 예외 처리
         if (request.getAge() == null) {
+            log.warn("[나이 null값]");
             throw new IllegalArgumentException("나이는 필수입니다.");
         }
 
         try {
             int age = Integer.parseInt(request.getAge().toString());
             if (age < 1 || age > 999) {
+                log.warn("[나이 범위 초과] 나이: {}", age);
                 throw new IllegalArgumentException("나이는 1부터 999까지의 숫자만 입력할 수 있습니다.");
             }
         } catch (NumberFormatException e) {
+            log.warn("[나이 형식 오류] 나이: {}", request.getAge());
             throw new IllegalArgumentException("나이는 숫자만 입력 가능합니다.");
         }
 
         // DB 등록 후 newUser 객체 생성
         User newUser = userRepository.save(new User(request.getName(), request.getAge()));
+        log.info("[회원 등록 완료]");
 
         // 첫 번째 페이지 캐시 키 정의
         String firstPageCacheKey = "getUsers::users:cursor:0:size:" + pageSize;
@@ -76,11 +86,13 @@ public class UserServiceV2 {
 
         // 조회된 캐시 데이터가 없으면 종료
         if (cachedUsers == null || cachedUsers.isEmpty()) {
+            log.info("[첫 페이지 캐시 없음 또는 비어 있음, 캐시 갱신 생략]");
             return;
         }
 
         List<UserResponse> updatedUsers = new ArrayList<>(cachedUsers); // 조회된 캐시 데이터(cachedUsers)를 새 리스트(updatedUsers)에 복사
         updatedUsers.add(0, new UserResponse(newUser)); // 새로운 사용자(newUser)를 리스트 맨 앞에 추가
+        log.info("[새 사용자 캐시 리스트에 추가 완료]");
 
         // 기존 만료시간(TTL, 초단위) 조회
         Long ttlInSeconds = redisTemplate.getExpire(firstPageCacheKey);
@@ -130,7 +142,6 @@ public class UserServiceV2 {
     // OFFSET 기반 페이징 적용
     @Transactional(readOnly = true) // 읽기 전용 트랜잭션
     public List<UserResponse> getUsersWithOffset(int page, int size) {
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
         Page<User> usersPage = userRepository.findAll(pageable); // 조회된 사용자 데이터를 List<User> 형태로 가져옴
@@ -185,29 +196,37 @@ public class UserServiceV2 {
 
     @Transactional
     public void updateUser(UserUpdateRequest request) {
+        log.info("[회원 수정] 요청 ID: {}, 새 이름: {}", request.getId(), request.getName());
 
         // 1. 이름 검증: null 또는 빈 문자열일 경우 예외 처리
         if (request.getName() == null || request.getName().trim().isEmpty()) {
+            log.warn("[이름이 비어있습니다]");
             throw new IllegalArgumentException("이름은 필수입니다.");
         }
 
         // 2. 이름 검증: 영어 또는 한글로 시작하고, 뒤에 숫자가 올 수 있는 패턴만 허용
         String nameRegex = "^[a-zA-Z가-힣]+[0-9]*$";
         if (!request.getName().matches(nameRegex)) {
+            log.warn("[잘못된 이름 형식] 새 이름: {}", request.getName());
             throw new IllegalArgumentException("이름은 영어 또는 한글로 시작하고, \n뒤에 숫자를 포함할 수 있습니다.");
         }
 
         // 3. 이름 중복 검사
         if (userRepository.existsByName(request.getName())) {
+            log.warn("[중복된 이름 사용 시도] 새 이름: {}", request.getName());
             throw new IllegalArgumentException("이미 사용 중인 이름입니다.");
         }
 
         // 4. 기존 회원 정보 가져오기
         User user = userRepository.findById(request.getId()) // findById: id를 기준으로 1개의 데이터를 가져옴. Optional<User> 형태로 반환
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다. ID: " + request.getId())); // Optional의 orElseThrow: 데이터가 없는 경우(해당 id가 없는 경우) 예외를 던짐
+                .orElseThrow(() -> {
+                    log.error("[수정 대상 회원를 찾을 수 없음] ID: {}", request.getId());
+                    return new IllegalArgumentException("해당 사용자가 존재하지 않습니다. ID: " + request.getId()); // Optional의 orElseThrow: 데이터가 없는 경우(해당 id가 없는 경우) 예외를 던짐
+                });
 
         // 5. 회원 이름 변경
         user.updateName(request.getName());
+        log.info("[회원 이름 변경 완료]");
 
         // 6. Redis에서 해당 회원이 포함된 캐시만 찾아서 수정 수정된 회원의 데이터가 있는 캐시 키를 찾아서 해당 회원 수정 후 레디스에 저장
         Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + request.getPageSize()); // Redis에 저장된 캐시의 모든 Key값을 조회
@@ -284,17 +303,25 @@ public class UserServiceV2 {
 
     @Transactional
     public void deleteUser(String name, int pageSize) {
+        log.info("[회원 삭제 요청] 이름: {}, 페이지 크기: {}", name, pageSize);
+
         // 1. 회원 유무 조회
         User user = userRepository.findByName(name)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> {
+                    log.error("[해당 이름의 사용자가 존재하지 않음] 이름: {}", name);
+                    return new IllegalArgumentException("존재하지 않는 사용자입니다.");
+                });
 
         // 2. 회원의 대출 기록 중 반납되지 않은 책이 있는지 확인
-        if (userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId())) {
+        boolean hasUnreturnedBooks = userLoanHistoryRepository.existsByUserIdAndIsReturnFalse(user.getId());
+        if (hasUnreturnedBooks) {
+            log.warn("[삭제 불가 - 대출 중인 책이 있음] 사용자 ID: {}", user.getId());
             throw new IllegalArgumentException("대출 중인 회원은 삭제할 수 없습니다. \n반납 후 다시 시도해주세요.");
         }
 
         // 3. 회원 삭제
         userRepository.delete(user);
+        log.info("[회원 삭제 완료]");
 
         // 4. 삭제된 회원의 데이터가 있는 캐시 키를 찾아서 해당 회원 삭제 후 레디스에 저장
         Set<String> cacheKeys = redisTemplate.keys("getUsers::users:cursor:*:size:" + pageSize); // Redis에 저장된 캐시의 모든 Key값을 조회

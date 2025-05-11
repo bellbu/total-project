@@ -24,7 +24,7 @@ public class CustomAdminDetailService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        log.info("email : " + email);
+        log.info("이메일: {}",email);
         Admin admin = adminRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email + " -> DB에서 관리자를 찾을 수 없습니다."));
         return new CustomAdmin(admin);

@@ -5,6 +5,7 @@ import com.group.totalproject.dto.user.request.UserDeleteRequest;
 import com.group.totalproject.dto.user.request.UserUpdateRequest;
 import com.group.totalproject.dto.user.response.UserResponse;
 import com.group.totalproject.service.user.UserServiceV2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @RestController // @RestController: 1.API 진입지점 만들어 줌 / 2.UserController 클래스를 스프링 빈으로 등록시켜 줌 / 3.@Controller + @ResponseBody(json 형태로 데이터를 반환해 줌)
 public class UserController { // Controller: API와 HTTP 담당
 
@@ -36,6 +38,7 @@ public class UserController { // Controller: API와 HTTP 담당
             userService.saveUser(request, request.getPageSize());
             return ResponseEntity.ok("회원 등록이 완료되었습니다.");
         } catch (IllegalArgumentException e) {
+            log.warn("회원 등록 실패: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -43,11 +46,12 @@ public class UserController { // Controller: API와 HTTP 담당
     @GetMapping("/user") // 목록보기
     @PreAuthorize("hasAuthority('ROLE_ADMIN')") // @PreAuthorize("hasAuthority('ROLE_ADMIN')"): Spring Security의 어노테이션, ROLE_ADMIN 권한이 있어야 접근 가능.
     public ResponseEntity<List<UserResponse>> getUsers(
-            @RequestParam(required = false) Long cursor,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size,
-            @RequestParam(defaultValue = "cache-cursor")String type
+            @RequestParam(name = "cursor", required = false) Long cursor,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "100") int size,
+            @RequestParam(name = "type", defaultValue = "cache-cursor")String type
     ) {
+        // log.info("[회원 목록 조회 요청] type: {}, cursor: {}, page: {}, size: {}", type, cursor, page, size);
 
         List<UserResponse> users;
         HttpHeaders headers = new HttpHeaders();
@@ -60,21 +64,29 @@ public class UserController { // Controller: API와 HTTP 담당
             case "cache-cursor":
                 key = "users:cursor:" + (cursor != null ? cursor : "0") + ":size:" + size;
                 Cache cache = cacheManager.getCache("getUsers");
+
                 if (cache != null && cache.get(key) != null) {
                     isHit = true;
+                    log.info("[캐시 HIT] key: {}", key);
+                } else {
+                    log.info("[캐시 MISS] key: {}", key);
                 }
+
                 users = userService.getUsersWithCache(cursor, size);
                 break;
 
             case "cursor":
+                log.info("[커서 기반 조회] cursor: {}, size: {}", cursor, size);
                 users = userService.getUsersWithCursor(cursor, size);
                 break;
 
             case "offset":
+                log.info("[오프셋 기반 조회] page: {}, size: {}", page, size);
                 users = userService.getUsersWithOffset(page, size);
                 break;
 
             default:
+                log.warn("잘못된 type 요청: {}", type);
                 throw new IllegalArgumentException("Invalid type: " + type);
         }
 
@@ -88,6 +100,7 @@ public class UserController { // Controller: API와 HTTP 담당
             headers.add("X-TTL", ttl != null && ttl > 0 ? ttl.toString() : "No TTL");
         }
 
+        log.info("[회원 목록 조회 완료] 응답 시간: {}ms, 조회 회원수: {}명", duration, users.size());
         return new ResponseEntity<>(users, headers, HttpStatus.OK);
 
 /*
@@ -185,6 +198,7 @@ public class UserController { // Controller: API와 HTTP 담당
             userService.updateUser(request);
             return ResponseEntity.ok("회원 이름이 수정되었습니다.");
         } catch (IllegalArgumentException e) {
+            log.warn("회원 수정 실패: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -195,6 +209,7 @@ public class UserController { // Controller: API와 HTTP 담당
             userService.deleteUser(request.getName(), request.getPageSize());
             return ResponseEntity.ok("회원이 삭제되었습니다.");
         } catch (IllegalArgumentException e) {
+            log.warn("회원 삭제 실패: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

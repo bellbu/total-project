@@ -51,6 +51,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
      * */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        log.info("[로그인 요청]");
         try {
             ObjectMapper objectMapper = new ObjectMapper(); // ObjectMapper: JSON ↔ Java 객체 간 변환을 수행
             // JSON 요청 본문을 읽어서 자바 객체 Map 타입으로 변환
@@ -58,9 +59,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             String email = credentials.get("email");
             String password = credentials.get("password");
-
-            log.info("email : " + email);
-            log.info("password : " + password);
 
             // 인증 객체 생성 및 인증 시도
             Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
