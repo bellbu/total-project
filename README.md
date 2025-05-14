@@ -22,27 +22,49 @@
   
 ### **2-2. 인증 & 보안 (Login System)**
 - **Spring Security + JWT**를 활용한 로그인 및 인증 시스템
+  
+- Access Token 만료 **1분 미만 시 연장 알림창 띄워서 Refresh Token으로 재발급** 기능 구현
+
 - 권한에 따라 **접근 제어** 기능 구현
     
     예) 비로그인 사용자 접근 차단, 부관리자 회원 목록 페이지 접근 제한
-    
-- **Refresh Token**을 이용한 **Access Token** 재발급 기능 구현 (TTL : Access Token - 3분, Refresh Token - 30분)
 <br />
 
 ### **2-3. 캐싱 & 성능 최적화 (Redis Cache + Cursor-based Pagination)**
 
-- 회원 조회 시 성능 비교를 위해 **세가지 페이징 방식 선택 가능**하도록 구현
+- 회원 조회 시 성능 비교를 위해 **조회 페이징 타입 선택** 기능 구현
     
     
     | **페이징 방식** | **평균 응답 속도 (10번 측정)** |
     | --- | --- |
-    | Offset Paging | 281ms |
-    | Cursor Paging | 100ms **(Offset 대비 4배 성능 개선)** |
-    | **Redis Cache + Cursor Paging** | 46ms **(Offset 대비 2배 성능 개선)** |
+    | Offset Paging | 217.6ms |
+    | Cursor Paging | 17.2ms **(Offset 대비 약 13배 성능 개선)** |
+    | **Redis Cache + Cursor Paging** | 5.5ms **(Offset 대비 약 40배 성능 개선)** |
+
+<br/>
+
+  
 - **Redis 캐싱 전략 (Look Aside + Write Through)**
     
-    - 조회: **Look Aside 전략** (캐시에 없으면 DB → Redis 저장 → 반환)
+    **- 조회: Look Aside(= Cache Aside) 전략** 
     
-    - 등록/수정/삭제:  **Write Through 전략** (DB 및 캐시 동시 반영)
+    <aside>
     
-    -  TTL: 3분 (페이지 단위로 설정하여 효율적인 갱신 유지)
+    **✅** **캐시 HIT:** 캐시에 데이터 있으면 → 캐시에서 바로 반환 
+    
+    **❌ 캐시 MISS:**  캐시에 데이터 없으면 → DB 조회 → 캐시에 저장 → 반환
+    
+    </aside> <br/>
+
+
+
+    **- 등록/수정/삭제: Write Through 전략**
+    
+    > 기존의 **Write Around** 전략에서 **Write Through**로 변경하여 데이터 일관성을 강화
+  
+    
+    <aside>
+    
+    ✅ 데이터 변경 시 **DB와 캐시에 동시 반영**
+    
+    </aside>
