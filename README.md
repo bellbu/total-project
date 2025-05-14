@@ -16,7 +16,7 @@
   **1) 기존 버전 (도서 관리 애플리케이션)**  
 
   **🔗** <a href="http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080" target="_blank">http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080</a>
-
+[새 탭에서 열기](https://www.google.com/){:target="_blank"}
 <br/>
 
   **2) 개선 버전 (Total Project)**  
