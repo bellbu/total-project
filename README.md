@@ -15,13 +15,13 @@
 
   **1) 기존 버전 (도서 관리 애플리케이션)**  
 
-  **🔗** <a href="http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080" target="_blank" rel="noopener noreferrer">http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080</a>
+  **🔗** <a href="http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080" target="_blank">http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080</a>
 
 <br/>
 
   **2) 개선 버전 (Total Project)**  
 
-  **🔗** <a href="https://total-project.shop" target="_blank" rel="noopener noreferrer">https://total-project.shop</a>
+  **🔗** <a href="https://total-project.shop" target="_blank">https://total-project.shop</a>
 
   <br/>
 
