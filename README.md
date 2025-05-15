@@ -10,37 +10,7 @@
 <br/>
 <br/>
 
-
-## 2. 프로젝트 링크
-
-  **1) 기존 버전 (도서 관리 애플리케이션)**  
-
-  **🔗** <a href="http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080" target="_blank">http://ec2-43-200-177-25.ap-northeast-2.compute.amazonaws.com:8080</a>
-
-<br/>
-
-  **2) 개선 버전 (Total Project)**  
-
-  **🔗** <a href="https://total-project.shop" target="_blank">https://total-project.shop</a>
-
-  <br/>
-
-  🔒 **테스트 계정 정보 (직접 관리자 가입 가능)**
-
-  <aside>
-  
-    관리자 아이디: admin@admin.com / 비번: 1111
-    
-    부관리자 아이디: user@admin.com / 비번: 1111
-  
-  </aside>
-
-
-<br/>
-<br/>
-<br/>
-
-## 3. 기존 프로젝트 개선 내용
+## 2. 기존 프로젝트 개선 내용
 
 ### **2-1. 웹 애플리케이션 (Library App)**
 
