@@ -32,7 +32,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // IP 로그 찍기
         String ip = getClientIp(request);
         String method = request.getMethod();
         String uri = request.getRequestURI();
@@ -65,7 +64,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     }
 
-    // 클라이언트 IP 추출 로직
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
