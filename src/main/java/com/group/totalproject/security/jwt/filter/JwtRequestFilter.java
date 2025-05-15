@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * JwtRequestFilter: 클라이언트의 요청에 포함된 토큰이 유효한지 확인하고, 유효하다면 사용자의 인증 정보를 SecurityContext에 저장하여 인증 상태를 유지
@@ -36,6 +37,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String uri = request.getRequestURI();
         log.info("[접속 IP] {} → {} {}", ip, method, uri);
+        // 차단할 IP 목록 (필요하면 Set으로 필드로 뺄 수도 있음)
+        Set<String> blockedIps = Set.of("2a06:98c0:3600::103");
+
+        if (blockedIps.contains(ip)) {
+            log.warn("[차단된 IP 접근 차단] {}", ip);
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+            return; // 더 이상 필터 체인 진행하지 않음
+        }
 
         // HttpServletRequest의 헤더에서 Authorization 값 읽어옴
         String header = request.getHeader(JwtConstants.TOKEN_HEADER); // String header = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
