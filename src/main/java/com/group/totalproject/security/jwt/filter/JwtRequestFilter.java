@@ -32,6 +32,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        // IP 로그 찍기
+        String ip = getClientIp(request);
+        String method = request.getMethod();
+        String uri = request.getRequestURI();
+        log.info("[접속 IP] {} → {} {}", ip, method, uri);
+
         // HttpServletRequest의 헤더에서 Authorization 값 읽어옴
         String header = request.getHeader(JwtConstants.TOKEN_HEADER); // String header = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
@@ -58,4 +64,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 
     }
+
+    // 클라이언트 IP 추출 로직
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        if (ip.contains(",")) {
+            ip = ip.split(",")[0]; // 다수의 프록시 거친 경우 첫 IP가 클라이언트 IP
+        }
+        return ip;
+    }
+
 }
