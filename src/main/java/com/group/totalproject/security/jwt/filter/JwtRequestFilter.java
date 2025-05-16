@@ -40,7 +40,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         // 차단할 IP 목록 (필요하면 Set으로 필드로 뺄 수도 있음)
         Set<String> blockedIps = Set.of(
-                "2a06:98c0:3600::103"
+                "2a06:98c0:3600::103",
+                "154.83.103.202",
+                "49.51.195.207",
+                "43.156.172.28"
         );
 
         if (blockedIps.contains(ip)) {
