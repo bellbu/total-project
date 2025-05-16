@@ -71,7 +71,7 @@ public class SecurityConfig {
 
         // 인가 설정
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                .requestMatchers("/wp-admin/**", "/wordpress/wp-admin/**").denyAll()
+                .requestMatchers("/wp-admin/**", "/wordpress/wp-admin/**", "/.env*", "/.git/**").denyAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers(PUBLIC_URLS).permitAll()
                 .requestMatchers(HttpMethod.POST, "/token/refresh-token").permitAll()
