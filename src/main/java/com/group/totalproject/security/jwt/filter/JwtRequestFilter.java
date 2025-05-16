@@ -40,6 +40,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // 차단할 IP 목록 (필요하면 Set으로 필드로 뺄 수도 있음)
         Set<String> blockedIps = Set.of("2a06:98c0:3600::103");
 
+        // Host 로그 추가
+        String host = request.getHeader("Host");
+        log.info("[접속 Host] {}", host);
+
         if (blockedIps.contains(ip)) {
             log.warn("[차단된 IP 접근 차단] {}", ip);
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
