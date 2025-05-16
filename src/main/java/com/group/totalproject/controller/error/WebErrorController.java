@@ -30,4 +30,11 @@ public class WebErrorController implements ErrorController {
         return "forward:/index.html";
     }
 
+    /*
+    @GetMapping(value = {"/{path:[^\\.]*}"})
+    public String index() {
+        return "forward:/index.html";
+    }
+    */
+    
 }
