@@ -9,10 +9,16 @@ import com.group.totalproject.domain.user.loanhistory.UserLoanHistoryRepository;
 import com.group.totalproject.dto.book.request.BookCreateRequest;
 import com.group.totalproject.dto.book.request.BookLoanRequest;
 import com.group.totalproject.dto.book.request.BookReturnRequest;
+import com.group.totalproject.dto.book.response.LoanResponse;
+import com.group.totalproject.dto.user.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,6 +40,14 @@ public class BookService {
         this.userRepository = userRepository;
     }
 */
+
+    @Transactional(readOnly = true)
+    public List<LoanResponse> getLoans() {
+        return userLoanHistoryRepository.findAll(Sort.by(Sort.Direction.DESC, "id")).stream() // findAll(): 메소드는 저장소에서 모든 사용자 데이터를 List<LoanResponse> 형태로 가져옴
+                .map(LoanResponse::new) // map(): 스트림 요소를 사용하려는 형태로 변환하는 중간연산 / LoanResponse::new(생성자 참조, (user) -> new LoanResponse(user);와 동일한 형태) : userLoanHistoryRepository 객체를 LoanResponse 객체로 변환
+                .collect(Collectors.toList());  // LoanResponse 객체들을 다시 리스트 형태로 수집하는 최종연산
+    }
+
     @Transactional
     public void saveBook(BookCreateRequest request) {
         log.info("[도서 등록 요청] 책이름: {}", request.getName());

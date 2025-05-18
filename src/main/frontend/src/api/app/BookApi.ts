@@ -1,6 +1,12 @@
 import {request, RequestMethod} from "../base/Requests";
+import {LoanData} from "../../model/LoanData";
 
 export class BookApi {
+
+  static getLoans = () => {
+    return request<LoanData[]>(RequestMethod.GET, 'book', {}, {})
+  }
+
   static postBook = (name: string) => {
     return request(RequestMethod.POST, 'book', {}, {name})
   }

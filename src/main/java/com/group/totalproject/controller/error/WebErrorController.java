@@ -14,7 +14,7 @@ import java.util.Set;
 public class WebErrorController implements ErrorController {
 
     private static final Set<String> reactPaths = Set.of(
-            "/", "mainPage", "joinPage", "loginPage", "adminPage", "userPage"
+            "/", "mainPage", "joinPage", "loginPage", "adminPage", "userPage", "loanPage"
     );
 
     @GetMapping("/{path:^(?!api|static|favicon\\.ico|.*\\..*).*}")

@@ -106,6 +106,14 @@ function AppRoutes() {
         }
       />
 
+      <Route path="/loanPage"
+        element={
+          <ProtectedRoute adminOnly={true}>
+            <MainPage />
+          </ProtectedRoute>
+        }
+      />
+
       <Route path="/adminPage"
         element={
           <ProtectedRoute>

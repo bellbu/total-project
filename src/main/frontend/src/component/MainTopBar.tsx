@@ -41,7 +41,7 @@ const TextButton = styled.button<{ isActive?: boolean }>`
   cursor: pointer;
   position: relative;
   padding-bottom: 4px;
-  margin-right: 20px; /* 버튼 간격 추가 */
+  margin-right: 30px; /* 버튼 간격 추가 */
 
   &:hover {
     color: #f0e68c;
@@ -200,12 +200,23 @@ const MainTopBar = ({ setTab, tab }: Props) => {
         setTab(Tab.USER);
     }
 
+    // 대출 현황 클릭 핸들러 추가
+    const handleLoanListClick = () => {
+        // authorities가 null이 아니고 isUser가 true이며 isAdmin이 false인 경우
+        if (!authorities?.isAdmin) {
+            Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
+            return;
+        }
+        setTab(Tab.LOAN);
+    }
+
     return (
         <Container>
             {/* 왼쪽 메뉴 */}
             <LeftMenu>
                 <TextButton onClick={() => setTab(Tab.FORM)} isActive={tab === Tab.FORM}>홈</TextButton>
                 <TextButton onClick={handleListClick} isActive={tab === Tab.USER}>회원 목록</TextButton>
+                <TextButton onClick={handleLoanListClick} isActive={tab === Tab.LOAN}>대출 현황</TextButton>
             </LeftMenu>
 
             {/* 오른쪽 메뉴 */}

@@ -3,15 +3,14 @@ package com.group.totalproject.controller.book;
 import com.group.totalproject.dto.book.request.BookCreateRequest;
 import com.group.totalproject.dto.book.request.BookLoanRequest;
 import com.group.totalproject.dto.book.request.BookReturnRequest;
+import com.group.totalproject.dto.book.response.LoanResponse;
+import com.group.totalproject.dto.user.response.UserResponse;
 import com.group.totalproject.service.book.BookService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -21,6 +20,11 @@ public class BookController {
 
     public BookController(BookService bookService) {
         this.bookService = bookService;
+    }
+
+    @GetMapping("/book") // 목록보기
+    public List<LoanResponse> getLoans() {
+        return bookService.getLoans();
     }
 
     @PostMapping("/book")

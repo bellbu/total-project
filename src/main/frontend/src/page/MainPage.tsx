@@ -3,6 +3,7 @@ import styled from "styled-components";
 import MainTopBar from "../component/MainTopBar";
 import FormPage from "./form/FormPage";
 import UserListPage from "./user-list/UserListPage";
+import LoanListPage from "./loan-list/LoanListPage";
 import Admin from "./admin/Admin"; // 관리자 페이지 추가
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -14,12 +15,12 @@ const Container = styled.div`
   min-width: 1440px;
 `
 
-const ContentsContainer = styled.div<{ isUserTab: boolean }>`
+const ContentsContainer = styled.div<{ isStableScroll: boolean }>`
   width: 100%;
   height: calc(100% - 6vh);
   box-sizing: border-box;
   overflow-y: auto;
-  ${(props) => props.isUserTab && `
+  ${(props) => props.isStableScroll && `
       scrollbar-gutter: stable;
 ` }
 `;
@@ -28,6 +29,7 @@ const ContentsContainer = styled.div<{ isUserTab: boolean }>`
 export enum Tab {
    FORM = "mainPage", // Tab.FORM = "main"
    USER = "userPage", // Tab.USER = "user"
+   LOAN = "loanPage", // Tab.LOAN = "loan"
    ADMIN = "adminPage", // Tab.ADMIN = "admin"
 }
 
@@ -49,9 +51,10 @@ const MainPage = () => {
   return (
     <Container>
       <MainTopBar setTab={setTab} tab={tab}/> {/* setTab: 탭에 해당하는 URL로 이동 / tab: URL 이동 후 현재 탭 저장 */}
-      <ContentsContainer isUserTab={tab === Tab.USER}>
+      <ContentsContainer isStableScroll={tab === Tab.USER || tab === Tab.LOAN}>
         {tab === Tab.FORM && <FormPage />} {/* tab === Tab.FORM가 true인 경우 => <FormPage /> 렌더링 */}
         {tab === Tab.USER && <UserListPage />}
+        {tab === Tab.LOAN && <LoanListPage />}
         {tab === Tab.ADMIN && <Admin />}
       </ContentsContainer>
     </Container>
