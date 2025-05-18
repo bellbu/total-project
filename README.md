@@ -5,7 +5,8 @@
 
 - **ERD 설계도**
   
-  ![image](https://github.com/user-attachments/assets/e6027e70-797e-4c3d-b332-5d8a17fd6c95)
+  ![image](https://github.com/user-attachments/assets/1e2ba362-ad86-483c-aaaf-a209d8e8148b)
+
 <br/>
 <br/>
 <br/>
