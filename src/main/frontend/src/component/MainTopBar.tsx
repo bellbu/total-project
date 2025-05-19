@@ -74,8 +74,14 @@ const TimeDisplay = styled.div`
   border-radius: 6px;
   font-size: 19px;
   font-weight: 700;
-  margin-right: 20px;
+  margin-right: 12px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  width: 202px;
+  height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 `;
 
 interface Props { // 부모 컴퍼넌트에서 넘어온 setTab과 tab의 값을 Props 인터페이스로 정의
@@ -190,6 +196,7 @@ const MainTopBar = ({ setTab, tab }: Props) => {
         }
     };
 
+    /*
     // 회원 목록 클릭 핸들러 추가
     const handleListClick = () => {
         // authorities가 null이 아니고 isUser가 true이며 isAdmin이 false인 경우
@@ -197,6 +204,7 @@ const MainTopBar = ({ setTab, tab }: Props) => {
             Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
             return;
         }
+
         setTab(Tab.USER);
     }
 
@@ -207,7 +215,18 @@ const MainTopBar = ({ setTab, tab }: Props) => {
             Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
             return;
         }
+
         setTab(Tab.LOAN);
+    }
+    */
+
+    const handleJoinClick = () => {
+        // authorities가 null이 아니고 isUser가 true이며 isAdmin이 false인 경우
+        if (!authorities?.isAdmin) {
+            Swal.alert("관리자만 접근할 수 있습니다.", "", "warning");
+            return;
+        }
+        setTab(Tab.JOIN);
     }
 
     return (
@@ -215,12 +234,13 @@ const MainTopBar = ({ setTab, tab }: Props) => {
             {/* 왼쪽 메뉴 */}
             <LeftMenu>
                 <TextButton onClick={() => setTab(Tab.FORM)} isActive={tab === Tab.FORM}>홈</TextButton>
-                <TextButton onClick={handleListClick} isActive={tab === Tab.USER}>회원 목록</TextButton>
-                <TextButton onClick={handleLoanListClick} isActive={tab === Tab.LOAN}>대출 현황</TextButton>
+                <TextButton onClick={() => setTab(Tab.USER)} isActive={tab === Tab.USER}>회원 목록</TextButton>
+                <TextButton onClick={() => setTab(Tab.LOAN)} isActive={tab === Tab.LOAN}>대출 현황</TextButton>
             </LeftMenu>
 
             {/* 오른쪽 메뉴 */}
             <RightMenu>
+                <TextButton onClick={handleJoinClick} isActive={tab === Tab.JOIN}>관리자 등록</TextButton>
                 <TimeDisplay>
                     {timeRemaining !== null && timeRemaining > 0 ? `토큰 만료시간: ${Math.floor(timeRemaining / 60)}분 ${timeRemaining % 60}초` : ''}
                 </TimeDisplay>

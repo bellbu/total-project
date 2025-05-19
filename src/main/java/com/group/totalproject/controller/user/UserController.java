@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -44,8 +45,7 @@ public class UserController { // Controller: API와 HTTP 담당
     }
 
     @GetMapping("/user") // 목록보기
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // @PreAuthorize("hasAuthority('ROLE_ADMIN')"): Spring Security의 어노테이션, ROLE_ADMIN 권한이 있어야 접근 가능.
-    public ResponseEntity<List<UserResponse>> getUsers(
+    public ResponseEntity<?> getUsers(
             @RequestParam(name = "cursor", required = false) Long cursor,
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "100") int size,
@@ -60,48 +60,54 @@ public class UserController { // Controller: API와 HTTP 담당
 
         long start = System.currentTimeMillis();
 
-        switch (type) {
-            case "cache-cursor":
-                key = "users:cursor:" + (cursor != null ? cursor : "0") + ":size:" + size;
-                Cache cache = cacheManager.getCache("getUsers");
+        try {
+            switch (type) {
+                case "cache-cursor":
+                    key = "users:cursor:" + (cursor != null ? cursor : "0") + ":size:" + size;
+                    Cache cache = cacheManager.getCache("getUsers");
 
-                if (cache != null && cache.get(key) != null) {
-                    isHit = true;
-                    log.info("[캐시 HIT] key: {}", key);
-                } else {
-                    log.info("[캐시 MISS] key: {}", key);
-                }
+                    if (cache != null && cache.get(key) != null) {
+                        isHit = true;
+                        log.info("[캐시 HIT] key: {}", key);
+                    } else {
+                        log.info("[캐시 MISS] key: {}", key);
+                    }
 
-                users = userService.getUsersWithCache(cursor, size);
-                break;
+                    users = userService.getUsersWithCache(cursor, size);
+                    break;
 
-            case "cursor":
-                log.info("[커서 기반 조회] cursor: {}, size: {}", cursor, size);
-                users = userService.getUsersWithCursor(cursor, size);
-                break;
+                case "cursor":
+                    log.info("[커서 기반 조회] cursor: {}, size: {}", cursor, size);
+                    users = userService.getUsersWithCursor(cursor, size);
+                    break;
 
-            case "offset":
-                log.info("[오프셋 기반 조회] page: {}, size: {}", page, size);
-                users = userService.getUsersWithOffset(page, size);
-                break;
+                case "offset":
+                    log.info("[오프셋 기반 조회] page: {}, size: {}", page, size);
+                    users = userService.getUsersWithOffset(page, size);
+                    break;
 
-            default:
-                log.warn("잘못된 type 요청: {}", type);
-                throw new IllegalArgumentException("Invalid type: " + type);
+                default:
+                    log.warn("잘못된 type 요청: {}", type);
+                    throw new IllegalArgumentException("Invalid type: " + type);
+            }
+
+            long duration = System.currentTimeMillis() - start;
+
+            headers.add("X-Cache", isHit ? "HIT" : "MISS");
+            headers.add("X-Response-Time", duration + "ms");
+
+            if (isHit) {
+                Long ttl = redisTemplate.getExpire("getUsers::" + key, TimeUnit.SECONDS);
+                headers.add("X-TTL", ttl != null && ttl > 0 ? ttl.toString() : "No TTL");
+            }
+
+            log.info("[회원 목록 조회 완료] 응답 시간: {}ms, 조회 회원수: {}명", duration, users.size());
+            return new ResponseEntity<>(users, headers, HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+            log.error("잘못된 요청 파라미터: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        long duration = System.currentTimeMillis() - start;
-
-        headers.add("X-Cache", isHit ? "HIT" : "MISS");
-        headers.add("X-Response-Time", duration + "ms");
-
-        if (isHit) {
-            Long ttl = redisTemplate.getExpire("getUsers::" + key, TimeUnit.SECONDS);
-            headers.add("X-TTL", ttl != null && ttl > 0 ? ttl.toString() : "No TTL");
-        }
-
-        log.info("[회원 목록 조회 완료] 응답 시간: {}ms, 조회 회원수: {}명", duration, users.size());
-        return new ResponseEntity<>(users, headers, HttpStatus.OK);
 
 /*
         1. CURCOR 기반 페이징 적용

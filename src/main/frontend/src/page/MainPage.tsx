@@ -5,6 +5,7 @@ import FormPage from "./form/FormPage";
 import UserListPage from "./user-list/UserListPage";
 import LoanListPage from "./loan-list/LoanListPage";
 import Admin from "./admin/Admin"; // 관리자 페이지 추가
+import Join from "./join/Join"; // 관리자 등록 페이지 추가
 import { useLocation, useNavigate } from "react-router-dom";
 
 const Container = styled.div`
@@ -30,6 +31,7 @@ export enum Tab {
    FORM = "mainPage", // Tab.FORM = "main"
    USER = "userPage", // Tab.USER = "user"
    LOAN = "loanPage", // Tab.LOAN = "loan"
+   JOIN = "joinPage", // Tab.ADMIN = "admin"
    ADMIN = "adminPage", // Tab.ADMIN = "admin"
 }
 
@@ -55,6 +57,7 @@ const MainPage = () => {
         {tab === Tab.FORM && <FormPage />} {/* tab === Tab.FORM가 true인 경우 => <FormPage /> 렌더링 */}
         {tab === Tab.USER && <UserListPage />}
         {tab === Tab.LOAN && <LoanListPage />}
+        {tab === Tab.JOIN && <Join />}
         {tab === Tab.ADMIN && <Admin />}
       </ContentsContainer>
     </Container>

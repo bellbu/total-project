@@ -84,9 +84,9 @@ function AppRoutes() {
 
       <Route path="/joinPage"
         element={
-          <PublicRoute>
-            <Join />
-          </PublicRoute>
+          <ProtectedRoute adminOnly={true}>
+            <MainPage />
+          </ProtectedRoute>
         }
       />
 
@@ -100,7 +100,7 @@ function AppRoutes() {
 
       <Route path="/userPage"
         element={
-          <ProtectedRoute adminOnly={true}>
+          <ProtectedRoute>
             <MainPage />
           </ProtectedRoute>
         }
@@ -108,7 +108,7 @@ function AppRoutes() {
 
       <Route path="/loanPage"
         element={
-          <ProtectedRoute adminOnly={true}>
+          <ProtectedRoute>
             <MainPage />
           </ProtectedRoute>
         }

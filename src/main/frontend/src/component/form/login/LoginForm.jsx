@@ -22,9 +22,9 @@ const LoginForm = () => {
 
     return (
         <div className="form">
-            <h2 className='login-title'>🔒 관리자 로그인</h2>
+            <h2 className='login-title2'>🔒 관리자 로그인</h2>
 
-            <form className="login-form" onSubmit={(e) => onLogin(e)}>
+            <form className="login-form login-form2" onSubmit={(e) => onLogin(e)}>
                 <div>
                     <label htmlFor="email">이메일</label>
                     <input type="text" 
@@ -48,9 +48,11 @@ const LoginForm = () => {
                            required       
                     />
                 </div>
-                <button type='submit' className='btn btn--form btn-login'>로그인</button>
-                <hr className='login-hr'/>
+                <hr className='login-hr2'/>
+                <button type='submit' className='btn btn--form btn-login btn-login2'>로그인</button>
+               {/*
                 <button type="button" className="btn btn--form btn-join" onClick={() => navigate('/joinPage')}>가입</button>
+                */}
             </form>
             
         </div>

@@ -4,6 +4,7 @@ import {LoanData} from "../../model/LoanData";
 import {BookApi} from "../../api/app/BookApi";
 import LoanListTableHeader from "../../component/loan-list/LoanListTableHeader";
 import LoanListTableItem from "../../component/loan-list/LoanListTableItem";
+import * as Swal from '../../api/common/alert';
 
 const Container = styled.div`
   display: flex;
@@ -23,6 +24,10 @@ const LoanListPage = () => {
     BookApi.getLoans()
       .then(data => {
         setLoanList(data)
+      })
+      .catch((error) => {
+        const errorMessage = error?.data || error.message || '오류가 발생했습니다.'
+        Swal.alert(errorMessage, '', 'error')
       })
   }
 

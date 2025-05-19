@@ -17,10 +17,21 @@
     text-align: center;
 }
 
+.login-title2 {
+    padding: 12px 0 39px;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+}
+
 .login-form {
     display: grid;
     grid-template-columns: 1fr;
     row-gap: 2.7vh;
+}
+
+.login-form2 {
+    row-gap: 3.8vh !important;
 }
 
 .login-form label {
@@ -105,6 +116,11 @@
     color: white;
 }
 
+.btn-login2 {
+    margin-top: 0px !important;
+    height: 6.2vh !important;
+}
+
 .btn-login:hover {
     background-color: #ff7777;
     color: white;
@@ -113,6 +129,7 @@
 }
 
 /* 가입 버튼 */
+
 .btn-join {
     height: 5.7vh;
     background-color: #748ffc;
@@ -128,7 +145,14 @@
 
 .login-hr{
     margin: 5px 0px !important;
+    color: floralwhite;
 }
+
+.login-hr2{
+    margin: 2px 0px !important;
+    color: floralwhite;
+}
+
 
 .button-group {
     display: grid;

@@ -7,11 +7,8 @@ import com.group.totalproject.security.custom.CustomAdmin;
 import com.group.totalproject.service.admin.AdminService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +24,6 @@ import java.util.Map;
 @Slf4j // log 객체를 자동 생성
 @RequiredArgsConstructor // 필드 주입을 생성자 주입으로 자동 설정
 @RestController
-@RequestMapping("/admin")
 public class AdminController { // JWT 토큰 생성 RestController
 
     private final AdminService adminService;
@@ -35,8 +31,7 @@ public class AdminController { // JWT 토큰 생성 RestController
     /**
      * 관리자 조회
      */
-    @Secured({"ROLE_ADMIN", "ROLE_USER"}) // 해당 메서드에 접근할 수 있는 권한 설정
-    @GetMapping("/info")
+    @GetMapping("/admin/info")
     public ResponseEntity<?> getAdmins(@AuthenticationPrincipal CustomAdmin customAdmin) { // @AuthenticationPrincipal: 로그인 인증 시 SecurityContextHolder에서 저장된 CustomAdmin 객체를 가져옴
         if (customAdmin == null) {
             log.warn("인증되지 않은 사용자가 관리자 정보를 요청함");
@@ -57,7 +52,7 @@ public class AdminController { // JWT 토큰 생성 RestController
     /**
      * 관리자 가입
      */
-    @PostMapping("")
+    @PostMapping("/admin")
     public ResponseEntity<?> saveAdmin(@RequestBody AdminCreateRequest request) throws Exception {
         try {
             int result = adminService.saveAdmin(request);
@@ -80,8 +75,7 @@ public class AdminController { // JWT 토큰 생성 RestController
     /**
      * 관리자 정보 수정
      */
-    @Secured({"ROLE_ADMIN", "ROLE_USER"}) // ADMIN 권한 설정
-    @PutMapping("")
+    @PutMapping("/admin")
     public ResponseEntity<?> updateAdmin(@RequestBody AdminUpdateRequest request) throws Exception {
         try {
             int result = adminService.updateAdmin(request);
@@ -102,8 +96,7 @@ public class AdminController { // JWT 토큰 생성 RestController
     /**
      * 관리자 탈퇴
      */
-    @Secured({"ROLE_ADMIN", "ROLE_USER"}) // Admin 권한 설정
-    @DeleteMapping("/{email}")
+    @DeleteMapping("/admin/{email}")
     public ResponseEntity<?> destroy(@PathVariable("email") String email) throws Exception {
         try {
 

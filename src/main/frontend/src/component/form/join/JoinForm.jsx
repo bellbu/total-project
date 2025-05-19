@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import '../login/LoginForm.css';
+import './JoinForm.css';
 import * as Swal from '../../../api/common/alert';
 
 const JoinForm = ({ join }) => {
@@ -9,6 +9,14 @@ const JoinForm = ({ join }) => {
   const [isRoleOpen, setIsRoleOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState('ROLE_ADMIN');
   const roleRef = useRef(null);
+  const formRef = useRef(null);
+
+  const resetForm = () => {
+    if (formRef.current) {
+      formRef.current.reset();
+      setSelectedRole('ROLE_ADMIN'); // 선택된 권한도 초기화
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -56,14 +64,14 @@ const JoinForm = ({ join }) => {
           return;
       }
 
-      join({ email, name, password, emailVerified, authorities: selectedRole });
+      join({ email, name, password, emailVerified, authorities: selectedRole }, resetForm);
   }
 
   return (
-    <div className="form">
-      <h2 className='login-title'>회원가입</h2>
+    <div className="join-form">
+      <h2 className='join-title'>📝 관리자 등록</h2>
 
-      <form className="login-form" onSubmit={(e) => onJoin(e)}>
+      <form className="login-form" ref={formRef} onSubmit={(e) => onJoin(e)}>
           <div>
               <label htmlFor="email">이메일</label>
               <input type="text" 
@@ -139,12 +147,14 @@ const JoinForm = ({ join }) => {
                 name="emailVerified"
                 value="true"
             />
-          <div className="button-group">
-            <button type='submit' className='btn btn--form btn-join'>가입</button>
+          <div className="admin-button-group">
+            <button type='submit' className='btn btn--form btn-join'>
+                등록
+            </button>
             <button 
               type='button' 
               className='btn btn--form btn-cancel' 
-              onClick={() => navigate("/loginPage")}
+              onClick={() => navigate("/")}
             >
               취소
             </button>

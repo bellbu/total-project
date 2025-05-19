@@ -68,6 +68,12 @@ const UserListPage = () => {
     try {
       setIsLoading(true); // isLoading이 true인 경우 => 로딩 중(회원 조회 중)
       const response = await UserApi.getUser(customCursor, customPage, PAGE_SIZE, pagingType); // 회원 조회 API
+
+      // 응답 유효성 체크
+      if (!response || !response.data) {
+        throw new Error('회원 데이터 응답이 올바르지 않습니다.');
+      }
+
       // 응답 데이터 추출
       const data = response.data; // 회원 리스트
       // 응답 헤더 값 추출
@@ -126,7 +132,8 @@ const UserListPage = () => {
 
     } catch (error) {
       console.error('Failed to load users:', error);
-      Swal.alert(error, '', 'error');
+      Swal.alert(`오류가 발생했습니다.`, '', 'error');
+      setHasMore(false);
     } finally {
       setIsLoading(false); // isLoading이 false인 경우 => 회원 조회 X
     }
@@ -159,7 +166,7 @@ const UserListPage = () => {
         setTotalCount(count);
     } catch (error) {
         console.error('Failed to load total count:', error);
-        Swal.alert(error, '', 'error');
+        Swal.alert(`오류가 발생했습니다.`, '', 'error');
     }
   }, []);
 

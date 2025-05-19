@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './AdminForm.css';
 import * as Swal from '../../../api/common/alert';
 
@@ -52,7 +53,7 @@ const AdminForm = ({ adminInfo, updateAdmin, deleteAdmin }) => {
 
   return (
     <div className="admin-form">
-      <h2 className='admin-title'>관리자 정보 수정</h2>
+      <h2 className='admin-title'>🛠️ 관리자 정보 수정</h2>
 
         <form className="login-form" onSubmit={(e) => onUpdate(e)}>
           <div>

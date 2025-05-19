@@ -4,7 +4,6 @@ import com.group.totalproject.dto.book.request.BookCreateRequest;
 import com.group.totalproject.dto.book.request.BookLoanRequest;
 import com.group.totalproject.dto.book.request.BookReturnRequest;
 import com.group.totalproject.dto.book.response.LoanResponse;
-import com.group.totalproject.dto.user.response.UserResponse;
 import com.group.totalproject.service.book.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

@@ -87,3 +87,47 @@ export const confirm = (title, text, icon, callback) => {
     })
     .then(callback)
 }
+
+// fire
+export const fire = (options, callback) => {
+    const {
+        title,
+        text,
+        icon,
+        confirmButtonText = "확인",
+        cancelButtonText,
+        showCancelButton = false,
+        confirmButtonColor = "#3085d6",
+        cancelButtonColor = "#d33",
+        backdrop = false
+    } = options;
+
+    MySwal.fire({
+        title,
+        text,
+        icon,
+        confirmButtonText,
+        cancelButtonText,
+        showCancelButton,
+        confirmButtonColor,
+        cancelButtonColor,
+        customClass: {
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+            confirmButton: 'swal2-confirm',
+            cancelButton: 'swal2-cancel'
+        },
+        backdrop,
+        didOpen: () => {
+            const titleEl = document.querySelector('.swal2-title');
+            const textEl = document.querySelector('.swal2-html-container');
+            const confirmEl = document.querySelector('.swal2-confirm');
+            const cancelEl = document.querySelector('.swal2-cancel');
+
+            if (titleEl) Object.assign(titleEl.style, customStyle.title);
+            if (textEl) Object.assign(textEl.style, customStyle.text);
+            if (confirmEl) Object.assign(confirmEl.style, customStyle.confirmButton);
+            if (cancelEl) Object.assign(cancelEl.style, customStyle.cancelButton);
+        }
+    }).then(callback);
+}
