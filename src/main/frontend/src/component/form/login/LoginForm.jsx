@@ -48,11 +48,15 @@ const LoginForm = () => {
                            required       
                     />
                 </div>
-                <hr className='login-hr2'/>
                 <button type='submit' className='btn btn--form btn-login btn-login2'>로그인</button>
-               {/*
-                <button type="button" className="btn btn--form btn-join" onClick={() => navigate('/joinPage')}>가입</button>
-                */}
+                <hr className='login-hr2'/>
+                <div className="login-autologin-guide">
+                  ⚠️ 자동 로그인은 이메일·비밀번호 입력 없이 로그인됩니다.
+                </div>
+                <div className="button-group">
+                    <button type='button' className='btn btn--form btn-login btn-login2 btn-login--admin' onClick={() => login('autoAdmin', '')}>관리자 자동 로그인</button>
+                    <button type='button' className='btn btn--form btn-login btn-login2 btn-login--subadmin' onClick={() => login('autoSubAdmin','')}>부관리자 자동 로그인</button>
+                </div>
             </form>
             
         </div>

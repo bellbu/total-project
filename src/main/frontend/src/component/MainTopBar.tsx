@@ -31,6 +31,14 @@ const RightMenu = styled.div`
   align-items: center;
 `;
 
+const Divider = styled.span`
+  width: 3.5px;
+  height: 32px;
+  background: #ffa885;
+  margin: 0 18px 0 -10px;
+  align-self: center;
+`;
+
 const TextButton = styled.button<{ isActive?: boolean }>`
   border: 0;
   outline: 0;
@@ -236,11 +244,12 @@ const MainTopBar = ({ setTab, tab }: Props) => {
                 <TextButton onClick={() => setTab(Tab.FORM)} isActive={tab === Tab.FORM}>홈</TextButton>
                 <TextButton onClick={() => setTab(Tab.USER)} isActive={tab === Tab.USER}>회원 목록</TextButton>
                 <TextButton onClick={() => setTab(Tab.LOAN)} isActive={tab === Tab.LOAN}>대출 현황</TextButton>
+                <Divider />
+                <TextButton onClick={handleJoinClick} isActive={tab === Tab.JOIN}>관리자 등록</TextButton>
             </LeftMenu>
 
             {/* 오른쪽 메뉴 */}
             <RightMenu>
-                <TextButton onClick={handleJoinClick} isActive={tab === Tab.JOIN}>관리자 등록</TextButton>
                 <TimeDisplay>
                     {timeRemaining !== null && timeRemaining > 0 ? `토큰 만료시간: ${Math.floor(timeRemaining / 60)}분 ${timeRemaining % 60}초` : ''}
                 </TimeDisplay>

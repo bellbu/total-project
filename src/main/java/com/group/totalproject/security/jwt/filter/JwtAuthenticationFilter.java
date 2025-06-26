@@ -1,6 +1,8 @@
 package com.group.totalproject.security.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group.totalproject.domain.admin.Admin;
+import com.group.totalproject.prop.AdminProps;
 import com.group.totalproject.security.custom.CustomAdmin;
 import com.group.totalproject.security.jwt.constants.JwtConstants;
 import com.group.totalproject.security.jwt.provider.JwtTokenProvider;
@@ -35,12 +37,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     
     private final AuthenticationManager authenticationManager; // 스프링 시큐리티 인증 관리자
     private final JwtTokenProvider jwtTokenProvider; // JWT 토큰 생성, 파싱, 유효성 검사 등을 담당하는 유틸 클래스.
+    private final AdminProps adminProps;
 
     // 생성자 주입
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, AdminProps adminProps) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
-        
+        this.adminProps = adminProps;
+
         setFilterProcessesUrl(JwtConstants.AUTH_LOGIN_URL); // "/login" 로그인 경로 요청 시 JwtAuthenticationFilter에서 처리하도록 지정
     }
 
@@ -59,6 +63,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             String email = credentials.get("email");
             String password = credentials.get("password");
+            
+            // 자동 로그인 분기 처리
+            if("autoAdmin".equals(email)) {
+                email = adminProps.getAdmin().getEmail();
+                password = adminProps.getAdmin().getPassword();
+            } else if("autoSubAdmin".equals(email)) {
+                email = adminProps.getSubadmin().getEmail();
+                password = adminProps.getSubadmin().getPassword();
+            }
 
             // 인증 객체 생성 및 인증 시도
             Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);

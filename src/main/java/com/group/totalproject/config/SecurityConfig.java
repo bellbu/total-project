@@ -1,5 +1,6 @@
 package com.group.totalproject.config;
 
+import com.group.totalproject.prop.AdminProps;
 import com.group.totalproject.security.custom.CustomAdminDetailService;
 import com.group.totalproject.security.jwt.filter.JwtAuthenticationFilter;
 import com.group.totalproject.security.jwt.filter.JwtRequestFilter;
@@ -37,6 +38,7 @@ public class SecurityConfig {
 
     private final CustomAdminDetailService customAdminDetailService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AdminProps adminProps;
 
     // 정적 상수로 허용할 경로들을 정의
     private static final String[] PUBLIC_URLS = {
@@ -67,7 +69,7 @@ public class SecurityConfig {
         http.csrf ((csrf) -> csrf.disable());
 
         // 필터 설정
-        http.addFilterAt(new JwtAuthenticationFilter(authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)), jwtTokenProvider), UsernamePasswordAuthenticationFilter.class) // 특정 위치에 커스텀 필터를 추가할 때 사용
+        http.addFilterAt(new JwtAuthenticationFilter(authenticationManager(http.getSharedObject(AuthenticationConfiguration.class)), jwtTokenProvider, adminProps), UsernamePasswordAuthenticationFilter.class) // 특정 위치에 커스텀 필터를 추가할 때 사용
                 .addFilterBefore(new JwtRequestFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class); // 지정된 필터 앞에 새로운 필터를 추가
 
         // 인가 설정

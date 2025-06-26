@@ -22,6 +22,10 @@
     font-size: 22px;
     font-weight: 600;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
 }
 
 .login-form {
@@ -149,7 +153,7 @@
 }
 
 .login-hr2{
-    margin: 2px 0px !important;
+    margin: 0px 0px !important;
     color: floralwhite;
 }
 
@@ -284,4 +288,42 @@ select:-moz-focusring {
 .select-selected:hover {
   border: 2px solid #748ffc;
   box-shadow: 0 0 10px rgba(116, 143, 252, 0.2);
+}
+
+/* 관리자 자동 로그인 버튼 */
+.btn-login--admin {
+    background-color: #74c0fc;  /* 밝은 하늘색 */
+    color: white;
+}
+
+.btn-login--admin:hover {
+    background-color: #4dabf7;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 137, 255, 0.35);
+}
+
+/* 부관리자 자동 로그인 버튼 */
+.btn-login--subadmin {
+    background-color: #b197fc; /* 연한 보라색 */
+    color: white;
+}
+
+.btn-login--subadmin:hover {
+    background-color: #9775fa;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(153, 122, 255, 0.35);
+}
+
+.login-autologin-guide {
+    font-size: 12.3px;
+    font-weight: 600;
+    color: #444;
+    line-height: 1.4;
+    margin-bottom: -10px;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
