@@ -22,7 +22,7 @@
 .join-form button {
     height: 5.9vh;
     align-self: end;
-    padding: 1.4vh 1.3vw;
+ /* padding: 1.4vh 1.3vw; */
 }
 
 .admin-button-group {

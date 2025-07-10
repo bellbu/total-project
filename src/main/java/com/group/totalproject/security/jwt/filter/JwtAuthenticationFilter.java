@@ -137,7 +137,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // 응답 설정
         // Access Token 헤더에 담기
         response.setHeader(JwtConstants.TOKEN_HEADER, JwtConstants.TOKEN_PREFIX+ jwt); // 생성한 JWT를 HTTP 응답 헤더(Authorization)에 추가
+
         // Refresh Token HttpOnly 쿠키로 설정
+        // Set-Cookie 헤더의 속성(HttpOnly: 자바스크립트 쿠키 접근 금지, Max-Age: 쿠키 유효 시간, SameSite: 다른 도메인간의 쿠키 전송 보안 설정, Secure: HTTPS 요청에서만 쿠키 전송)
+        // SameSite의 옵션 - Strict: 같은 도메인에서 요청할 때만, Lax(기본값): 같은 도메인이거나 GET 방식의 외부 링크 일 때만, None: 다른 도메인 간에도 쿠키 전송. 단, Secure도 같이 써야 함 
         response.addHeader("Set-Cookie", "refreshToken=" + refreshToken +
                 "; HttpOnly; Path=/; Max-Age=600; SameSite=None; Secure");
 
